@@ -4,9 +4,11 @@
 // Landing / Home Page — Hero + Features + Stats
 // ============================================
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import CountUp from "react-countup";
+import { getAggregatedStats } from "@/utils/helpers";
 import {
   HiOutlineLightningBolt,
   HiOutlineChartBar,
@@ -72,6 +74,18 @@ const stats = [
 ];
 
 export default function Home() {
+  const [liveStats, setLiveStats] = useState<{
+    totalCalculations: number;
+    totalKwhTracked: number;
+    totalDevicesTracked: number;
+  } | null>(null);
+
+  useEffect(() => {
+    const data = getAggregatedStats();
+    if (data.totalCalculations > 0) {
+      setLiveStats(data);
+    }
+  }, []);
   return (
     <div className="min-h-screen">
       {/* ===== HERO SECTION ===== */}
@@ -129,26 +143,43 @@ export default function Home() {
           </motion.div>
 
           {/* Hero chat preview */}
-          <motion.div variants={fadeInUp} className="mt-16 relative mx-auto max-w-2xl">
+          <motion.div
+            variants={fadeInUp}
+            className="mt-16 relative mx-auto max-w-2xl"
+          >
             <div className="relative glass rounded-2xl p-6 energy-glow">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-3 h-3 rounded-full bg-red-500/80" />
                 <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
                 <div className="w-3 h-3 rounded-full bg-green-500/80" />
-                <span className="ml-2 text-xs text-dark-300">EnergyIQ Chat</span>
+                <span className="ml-2 text-xs text-dark-300">
+                  EnergyIQ Chat
+                </span>
               </div>
               <div className="space-y-3">
                 <div className="flex gap-3">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-xs flex-shrink-0">⚡</div>
-                  <div className="glass-light rounded-2xl rounded-tl-sm px-4 py-2.5 text-sm text-dark-50 max-w-xs text-left">How many electrical devices do you use at home?</div>
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-xs flex-shrink-0">
+                    ⚡
+                  </div>
+                  <div className="glass-light rounded-2xl rounded-tl-sm px-4 py-2.5 text-sm text-dark-50 max-w-xs text-left">
+                    How many electrical devices do you use at home?
+                  </div>
                 </div>
                 <div className="flex gap-3 justify-end">
-                  <div className="bg-primary-500/15 border border-primary-500/20 rounded-2xl rounded-tr-sm px-4 py-2.5 text-sm text-primary-300 max-w-xs">I have 5 devices — AC, 3 Fans, and a TV.</div>
+                  <div className="bg-primary-500/15 border border-primary-500/20 rounded-2xl rounded-tr-sm px-4 py-2.5 text-sm text-primary-300 max-w-xs">
+                    I have 5 devices — AC, 3 Fans, and a TV.
+                  </div>
                 </div>
                 <div className="flex gap-3">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-xs flex-shrink-0">⚡</div>
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-xs flex-shrink-0">
+                    ⚡
+                  </div>
                   <div className="glass-light rounded-2xl rounded-tl-sm px-4 py-2.5 text-sm text-dark-50 max-w-xs text-left">
-                    Your estimated monthly cost is <span className="text-primary-400 font-semibold">₹2,340</span>. Let me show you a breakdown! 📊
+                    Your estimated monthly cost is{" "}
+                    <span className="text-primary-400 font-semibold">
+                      ₹2,340
+                    </span>
+                    . Let me show you a breakdown! 📊
                   </div>
                 </div>
               </div>
@@ -163,32 +194,88 @@ export default function Home() {
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6"
+          className="max-w-5xl mx-auto"
         >
-          {stats.map((stat, idx) => (
+          {/* Live stats banner (shown only after calculations) */}
+          {liveStats && (
             <motion.div
-              key={stat.label}
               initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: idx * 0.1 }}
-              className="text-center p-6 glass rounded-2xl"
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-8 p-4 rounded-2xl bg-gradient-to-r from-primary-500/10 to-accent-500/10 border border-primary-500/15"
             >
-              <div className="text-3xl md:text-4xl font-bold gradient-text mb-1">
-                <CountUp end={stat.end} suffix={stat.suffix} duration={2.5} enableScrollSpy scrollSpyOnce />
+              <p className="text-center text-xs text-dark-300 mb-3 uppercase tracking-wider">
+                📊 Your Personal Energy Tracking
+              </p>
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div>
+                  <div className="text-2xl font-bold text-primary-400">
+                    <CountUp end={liveStats.totalCalculations} duration={2} />
+                  </div>
+                  <p className="text-xs text-dark-300">Calculations Done</p>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-accent-400">
+                    <CountUp
+                      end={liveStats.totalKwhTracked}
+                      duration={2}
+                      suffix=" kWh"
+                    />
+                  </div>
+                  <p className="text-xs text-dark-300">Energy Tracked</p>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-purple-400">
+                    <CountUp end={liveStats.totalDevicesTracked} duration={2} />
+                  </div>
+                  <p className="text-xs text-dark-300">Devices Analyzed</p>
+                </div>
               </div>
-              <p className="text-sm text-dark-200">{stat.label}</p>
             </motion.div>
-          ))}
+          )}
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {stats.map((stat, idx) => (
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.1 }}
+                className="text-center p-6 glass rounded-2xl"
+              >
+                <div className="text-3xl md:text-4xl font-bold gradient-text mb-1">
+                  <CountUp
+                    end={stat.end}
+                    suffix={stat.suffix}
+                    duration={2.5}
+                    enableScrollSpy
+                    scrollSpyOnce
+                  />
+                </div>
+                <p className="text-sm text-dark-200">{stat.label}</p>
+              </motion.div>
+            ))}
+          </div>
         </motion.div>
       </section>
 
       {/* ===== FEATURES ===== */}
       <section className="px-4 py-20">
         <div className="max-w-6xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-14">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Everything You Need to <span className="gradient-text">Save Energy</span></h2>
-            <p className="text-dark-200 max-w-xl mx-auto">A complete toolkit to understand, analyze, and optimize your household energy consumption.</p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-14"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Everything You Need to{" "}
+              <span className="gradient-text">Save Energy</span>
+            </h2>
+            <p className="text-dark-200 max-w-xl mx-auto">
+              A complete toolkit to understand, analyze, and optimize your
+              household energy consumption.
+            </p>
           </motion.div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {features.map((feat, idx) => {
@@ -203,11 +290,17 @@ export default function Home() {
                   whileHover={{ y: -4, transition: { duration: 0.2 } }}
                   className="group p-6 rounded-2xl glass hover:energy-glow transition-all duration-300 cursor-default"
                 >
-                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${feat.gradient} flex items-center justify-center mb-4`}>
+                  <div
+                    className={`w-12 h-12 rounded-xl bg-gradient-to-br ${feat.gradient} flex items-center justify-center mb-4`}
+                  >
                     <Icon className="w-6 h-6 text-primary-400" />
                   </div>
-                  <h3 className="text-lg font-semibold text-dark-50 mb-2">{feat.title}</h3>
-                  <p className="text-sm text-dark-200 leading-relaxed">{feat.desc}</p>
+                  <h3 className="text-lg font-semibold text-dark-50 mb-2">
+                    {feat.title}
+                  </h3>
+                  <p className="text-sm text-dark-200 leading-relaxed">
+                    {feat.desc}
+                  </p>
                 </motion.div>
               );
             })}
@@ -223,16 +316,28 @@ export default function Home() {
           viewport={{ once: true }}
           className="max-w-3xl mx-auto text-center p-10 rounded-3xl bg-gradient-to-br from-primary-500/10 to-accent-500/10 border border-primary-500/10"
         >
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Cut Your <span className="gradient-text">Electricity Bill</span>?</h2>
-          <p className="text-dark-200 mb-8 max-w-lg mx-auto">Start chatting with our AI calculator now. It takes less than 30 seconds to get your energy consumption estimate.</p>
-          <Link href="/calculator" className="inline-block px-10 py-4 rounded-xl bg-gradient-to-r from-primary-500 to-accent-500 text-white font-semibold text-lg hover:shadow-xl hover:shadow-primary-500/25 transition-all duration-300 hover:-translate-y-0.5">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            Ready to Cut Your{" "}
+            <span className="gradient-text">Electricity Bill</span>?
+          </h2>
+          <p className="text-dark-200 mb-8 max-w-lg mx-auto">
+            Start chatting with our AI calculator now. It takes less than 30
+            seconds to get your energy consumption estimate.
+          </p>
+          <Link
+            href="/calculator"
+            className="inline-block px-10 py-4 rounded-xl bg-gradient-to-r from-primary-500 to-accent-500 text-white font-semibold text-lg hover:shadow-xl hover:shadow-primary-500/25 transition-all duration-300 hover:-translate-y-0.5"
+          >
             Launch Calculator ⚡
           </Link>
         </motion.div>
       </section>
 
       <footer className="px-4 py-8 border-t border-white/5 text-center">
-        <p className="text-sm text-dark-300">© {new Date().getFullYear()} EnergyIQ — Built with 💚 for a greener planet.</p>
+        <p className="text-sm text-dark-300">
+          © {new Date().getFullYear()} EnergyIQ — Built with 💚 for a greener
+          planet.
+        </p>
       </footer>
     </div>
   );
