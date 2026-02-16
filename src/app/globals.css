@@ -36,16 +36,18 @@ body {
 /* Glassmorphism utility */
 @layer utilities {
   .glass {
-    background: rgba(26, 27, 30, 0.7);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    background: rgba(26, 27, 30, 0.8);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.08);
+    will-change: auto;
   }
   .glass-light {
-    background: rgba(44, 46, 51, 0.5);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: rgba(44, 46, 51, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     border: 1px solid rgba(255, 255, 255, 0.06);
+    will-change: auto;
   }
   .gradient-text {
     background: linear-gradient(135deg, #20c997 0%, #339af0 100%);
@@ -104,4 +106,184 @@ body {
 }
 .typing-dot:nth-child(3) {
   animation-delay: 0.4s;
+}
+
+/* ===== Light Theme ===== */
+.light-theme {
+  --background: #f8f9fa;
+  --foreground: #212529;
+}
+
+.light-theme body {
+  background: #f8f9fa;
+  color: #212529;
+}
+
+.light-theme ::-webkit-scrollbar-track {
+  background: #e9ecef;
+}
+.light-theme ::-webkit-scrollbar-thumb {
+  background: #adb5bd;
+}
+.light-theme ::-webkit-scrollbar-thumb:hover {
+  background: #868e96;
+}
+
+/* Glass — remove heavy blur in light mode to reduce lag */
+.light-theme .glass {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+.light-theme .glass-light {
+  background: rgba(241, 243, 245, 0.85);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+/* ---------- Text color overrides ---------- */
+/* All Tailwind dark-* text colors need to flip to dark text */
+.light-theme .text-dark-50 {
+  color: #1a1a1a !important;
+}
+.light-theme .text-dark-100 {
+  color: #2b2b2b !important;
+}
+.light-theme .text-dark-200 {
+  color: #3d3d3d !important;
+}
+.light-theme .text-dark-300 {
+  color: #555555 !important;
+}
+.light-theme .text-dark-400 {
+  color: #6e6e6e !important;
+}
+.light-theme .text-dark-500 {
+  color: #868e96 !important;
+}
+
+/* White text used on dark bg — make it dark on light bg */
+.light-theme .text-white {
+  color: #212529 !important;
+}
+.light-theme .hover\:text-white:hover {
+  color: #212529 !important;
+}
+
+/* Primary colors — darken slightly for readability on white */
+.light-theme .text-primary-300 {
+  color: #0ca678 !important;
+}
+.light-theme .text-primary-400 {
+  color: #099268 !important;
+}
+
+/* Placeholder */
+.light-theme .placeholder-dark-300::placeholder {
+  color: #868e96 !important;
+}
+
+/* ---------- Background overrides ---------- */
+.light-theme .bg-dark-600 {
+  background-color: #e9ecef !important;
+}
+.light-theme .bg-dark-700 {
+  background-color: #dee2e6 !important;
+}
+.light-theme .bg-dark-800 {
+  background-color: #e9ecef !important;
+}
+.light-theme .bg-dark-900 {
+  background-color: #f1f3f5 !important;
+}
+
+/* User message bubble */
+.light-theme .bg-primary-500\/15 {
+  background-color: rgba(32, 201, 151, 0.1) !important;
+}
+.light-theme .border-primary-500\/20 {
+  border-color: rgba(32, 201, 151, 0.25) !important;
+}
+
+/* ---------- Border overrides ---------- */
+.light-theme .border-white\/5,
+.light-theme .border-white\/6,
+.light-theme .border-white\/8,
+.light-theme .border-white\/10 {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* ---------- Hover states ---------- */
+.light-theme .hover\:bg-white\/5:hover {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+.light-theme .hover\:bg-white\/10:hover {
+  background-color: rgba(0, 0, 0, 0.06) !important;
+}
+.light-theme .hover\:bg-primary-500\/15:hover {
+  background-color: rgba(32, 201, 151, 0.12) !important;
+}
+
+/* ---------- Inline code tags in bot messages ---------- */
+.light-theme code {
+  background: rgba(32, 201, 151, 0.1);
+  color: #087f5b;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+/* ---------- Gradient text stays visible ---------- */
+.light-theme .gradient-text {
+  background: linear-gradient(135deg, #099268 0%, #1864ab 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ---------- Energy glow (softer for light bg) ---------- */
+.light-theme .energy-glow {
+  box-shadow:
+    0 0 15px rgba(32, 201, 151, 0.08),
+    0 0 30px rgba(32, 201, 151, 0.03);
+}
+
+/* ---------- Input styling ---------- */
+.light-theme input.glass {
+  color: #212529 !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+}
+.light-theme input.glass:focus {
+  box-shadow: 0 0 0 2px rgba(32, 201, 151, 0.2);
+}
+
+/* ---------- Quick action buttons ---------- */
+.light-theme button.glass {
+  color: #495057;
+}
+.light-theme button.glass:hover {
+  color: #099268;
+  background: rgba(32, 201, 151, 0.08) !important;
+}
+
+/* ---------- Strong tags inside bot messages ---------- */
+.light-theme .glass-light strong {
+  color: #212529;
+}
+
+/* ---------- Sidebar active state ---------- */
+.light-theme .bg-gradient-to-r.from-primary-500\/15 {
+  background: rgba(32, 201, 151, 0.08) !important;
+}
+
+/* Send button should keep white text */
+.light-theme .bg-gradient-to-r.from-primary-500.to-accent-500 .text-white,
+.light-theme button.bg-gradient-to-r .text-white {
+  color: #ffffff !important;
+}
+.light-theme .p-2\.5.rounded-xl.bg-gradient-to-r {
+  color: #ffffff !important;
 }

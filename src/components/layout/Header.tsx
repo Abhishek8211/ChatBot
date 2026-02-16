@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { HiOutlineLightningBolt } from "react-icons/hi";
 import { HiOutlineBars3 } from "react-icons/hi2";
+import ThemeToggle from "@/components/ThemeToggle";
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -42,14 +43,14 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
             <h1 className="text-lg font-bold gradient-text leading-tight">
               EnergyIQ
             </h1>
-            <p className="text-[10px] text-dark-200 -mt-1">
-              Smart Calculator
-            </p>
+            <p className="text-[10px] text-dark-200 -mt-1">Smart Calculator</p>
           </div>
         </Link>
 
         {/* Right side actions */}
         <div className="flex items-center gap-3">
+          <ThemeToggle />
+
           <motion.div
             animate={{ opacity: [0.5, 1, 0.5] }}
             transition={{ duration: 2, repeat: Infinity }}
