@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===== Custom Cursor — hide native cursor on desktop ===== */
+.custom-cursor-active,
+.custom-cursor-active * {
+  cursor: none !important;
+}
+/* Keep native cursor on the toggle button itself */
+.custom-cursor-active [data-cursor-toggle] {
+  cursor: pointer !important;
+}
+
 :root {
   --background: #101113;
   --foreground: #c1c2c5;
