@@ -202,7 +202,12 @@ export default function ChatBot({ onCalculationComplete }: ChatBotProps) {
     country: "India",
   });
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [darkMode, setDarkMode] = useState(true);
+  const [darkMode, setDarkMode] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("theme") !== "light";
+    }
+    return true;
+  });
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -237,9 +242,10 @@ export default function ChatBot({ onCalculationComplete }: ChatBotProps) {
     [soundEnabled],
   );
 
-  // Toggle theme class on document root
+  // Toggle theme class on document root & sync with localStorage
   useEffect(() => {
     document.documentElement.classList.toggle("light-theme", !darkMode);
+    localStorage.setItem("theme", darkMode ? "dark" : "light");
   }, [darkMode]);
 
   // Scroll to bottom on new messages
@@ -428,17 +434,39 @@ export default function ChatBot({ onCalculationComplete }: ChatBotProps) {
         setCurrentDevice((prev) => ({ ...prev, wattage }));
         setStep("ask_hours");
         addBotMessage(
-          `⚡ <strong>${wattage}W</strong> — noted!<br/><br/>How many <strong>hours per day</strong> do you use this device on average?`,
+          `⚡ <strong>${wattage}W</strong> — noted!<br/><br/>How long do you use this device <strong>per day</strong>?<br/><br/>You can type:<br/>• Hours: <code>2</code> or <code>0.5</code><br/>• Minutes: <code>30m</code> or <code>45min</code><br/>• Both: <code>1h30m</code>`,
         );
         break;
       }
 
       case "ask_hours": {
-        const hours = parseFloat(userInput);
-        if (isNaN(hours) || hours < 0.1 || hours > 24) {
-          addBotMessage("Please enter hours between 0.1 and 24.");
+        let hours: number;
+        const input = userInput.trim().toLowerCase();
+
+        // Parse "1h30m", "1h 30m", "2h30min" format
+        const hhmm = input.match(/^(\d+(?:\.\d+)?)\s*h\s*(\d+)?\s*m(?:in)?$/i);
+        // Parse "30m", "45min", "90min" format
+        const minOnly = input.match(/^(\d+(?:\.\d+)?)\s*m(?:in)?$/i);
+
+        if (hhmm) {
+          hours = parseFloat(hhmm[1]) + (hhmm[2] ? parseFloat(hhmm[2]) / 60 : 0);
+        } else if (minOnly) {
+          hours = parseFloat(minOnly[1]) / 60;
+        } else {
+          hours = parseFloat(input);
+        }
+
+        if (isNaN(hours) || hours < 1 / 60 || hours > 24) {
+          addBotMessage(
+            "⚠️ Please enter a valid duration.<br/><br/>" +
+            "Examples: <code>2</code> (hours), <code>30m</code> (minutes), <code>1h30m</code> (mixed)<br/>" +
+            "Range: 1 minute to 24 hours."
+          );
           return;
         }
+
+        // Round to 2 decimal places
+        hours = Math.round(hours * 100) / 100;
         const device: Device = {
           id: generateId(),
           type: currentDevice.type as DeviceType,
@@ -451,6 +479,13 @@ export default function ChatBot({ onCalculationComplete }: ChatBotProps) {
           (device.wattage * device.quantity * device.hoursPerDay) / 1000;
         const monthlyKwh = dailyKwh * 30;
 
+        // Format display time nicely
+        const displayTime = device.hoursPerDay >= 1
+          ? (device.hoursPerDay % 1 === 0
+              ? `${device.hoursPerDay}h`
+              : `${Math.floor(device.hoursPerDay)}h ${Math.round((device.hoursPerDay % 1) * 60)}m`)
+          : `${Math.round(device.hoursPerDay * 60)}m`;
+
         const newDevices = [...devices, device];
         setDevices(newDevices);
         const nextIndex = deviceIndex + 1;
@@ -460,7 +495,7 @@ export default function ChatBot({ onCalculationComplete }: ChatBotProps) {
           setStep("ask_device_type");
           addBotMessage(
             `✅ <strong>${DEVICE_ICONS[device.type]} ${device.type}</strong> added!<br/>` +
-              `• Qty: ${device.quantity} | Wattage: ${device.wattage}W | Hours: ${device.hoursPerDay}h/day<br/>` +
+              `• Qty: ${device.quantity} | Wattage: ${device.wattage}W | Usage: ${displayTime}/day<br/>` +
               `• Daily: ${dailyKwh.toFixed(2)} kWh | Monthly: ${monthlyKwh.toFixed(2)} kWh<br/><br/>` +
               `📱 <strong>Device #${nextIndex + 1}</strong> — What type?<br/><br/>` +
               `${DEVICE_TYPES.map((d) => `<code>${DEVICE_ICONS[d]} ${d}</code>`).join(", ")}`,
@@ -470,7 +505,7 @@ export default function ChatBot({ onCalculationComplete }: ChatBotProps) {
           setStep("calculating");
           addBotMessage(
             `✅ <strong>${DEVICE_ICONS[device.type]} ${device.type}</strong> added!<br/>` +
-              `• Qty: ${device.quantity} | Wattage: ${device.wattage}W | Hours: ${device.hoursPerDay}h/day<br/><br/>` +
+              `• Qty: ${device.quantity} | Wattage: ${device.wattage}W | Usage: ${displayTime}/day<br/><br/>` +
               `All <strong>${totalDeviceCount} devices</strong> added! Let me calculate your energy consumption... 🔄`,
           );
 
@@ -520,6 +555,8 @@ export default function ChatBot({ onCalculationComplete }: ChatBotProps) {
           setStep("ask_device_count");
           addBotMessage(
             "🔄 Reset! Let's start fresh.<br/><br/>How many electrical devices do you use at home?",
+            undefined,
+            true,
           );
         } else if (userInput.toLowerCase() === "tips") {
           setStep("tips");
@@ -533,10 +570,14 @@ export default function ChatBot({ onCalculationComplete }: ChatBotProps) {
               `6. ☀️ Use <strong>natural light</strong> during daytime.<br/>` +
               `7. 🧺 Run washing machines on <strong>full loads</strong> only.<br/><br/>` +
               `Type <code>reset</code> to calculate again!`,
+            undefined,
+            true,
           );
         } else {
           addBotMessage(
             "Type <code>reset</code> to start a new calculation, or <code>tips</code> for energy-saving advice!",
+            undefined,
+            true,
           );
         }
         break;
@@ -590,7 +631,11 @@ export default function ChatBot({ onCalculationComplete }: ChatBotProps) {
       }
       case "ask_hours":
         return [
+          { label: "15m", value: "15m" },
+          { label: "30m", value: "30m" },
+          { label: "45m", value: "45m" },
           { label: "1h", value: "1" },
+          { label: "1h30m", value: "1h30m" },
           { label: "2h", value: "2" },
           { label: "4h", value: "4" },
           { label: "6h", value: "6" },
@@ -775,7 +820,7 @@ export default function ChatBot({ onCalculationComplete }: ChatBotProps) {
                     : step === "ask_wattage"
                       ? "Enter wattage or type 'auto'..."
                       : step === "ask_hours"
-                        ? "Enter hours per day..."
+                        ? "e.g. 2, 30m, 1h30m..."
                         : "Type a message..."
             }
             className="flex-1 px-4 py-2.5 rounded-xl glass text-sm text-dark-50 placeholder-dark-300 focus:outline-none focus:ring-1 focus:ring-primary-500/50 transition-all"
