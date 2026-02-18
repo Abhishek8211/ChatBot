@@ -19,12 +19,13 @@ import {
 } from "react-icons/hi";
 
 const fadeInUp = {
-  initial: { opacity: 0, y: 30 },
+  initial: { opacity: 0, y: 15 },
   animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.3 },
 };
 
 const stagger = {
-  animate: { transition: { staggerChildren: 0.1 } },
+  animate: { transition: { staggerChildren: 0.06 } },
 };
 
 const features = [

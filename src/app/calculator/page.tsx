@@ -7,6 +7,7 @@
 import { useState, lazy, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ChatBot from "@/components/ChatBot";
+import TipsModal from "@/components/TipsModal";
 import { CalculationResult } from "@/utils/types";
 import { downloadReport } from "@/utils/pdf";
 import {
@@ -27,6 +28,7 @@ import {
   HiOutlinePhotograph,
   HiOutlineDocumentText,
   HiOutlineSparkles,
+  HiOutlineLightBulb,
 } from "react-icons/hi";
 
 // Lazy load charts for code splitting
@@ -59,6 +61,7 @@ export default function CalculatorPage() {
   >([]);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
+  const [isTipsOpen, setIsTipsOpen] = useState(false);
 
   /** Fire confetti celebration */
   const fireConfetti = async () => {
@@ -163,8 +166,9 @@ export default function CalculatorPage() {
     <div className="min-h-screen p-4 md:p-6 space-y-6">
       {/* Page header */}
       <motion.div
-        initial={{ opacity: 0, y: -10 }}
+        initial={{ opacity: 0, y: -5 }}
         animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25 }}
         className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
       >
         <div>
@@ -224,6 +228,16 @@ export default function CalculatorPage() {
                 )}
               </AnimatePresence>
             </div>
+            <motion.button
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.96 }}
+              onClick={() => setIsTipsOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-primary-500 to-accent-500 text-white text-sm font-medium
+                         hover:shadow-lg hover:shadow-primary-500/25 transition-all"
+            >
+              <HiOutlineLightBulb className="w-4 h-4" />
+              AI Tips
+            </motion.button>
             <button
               onClick={handleReset}
               className="px-4 py-2 rounded-lg bg-red-500/15 text-red-400 text-sm hover:bg-red-500/25 transition-all"
@@ -470,6 +484,15 @@ export default function CalculatorPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* TipsModal — AI energy tips panel */}
+      {result && (
+        <TipsModal
+          isOpen={isTipsOpen}
+          onClose={() => setIsTipsOpen(false)}
+          result={result}
+        />
+      )}
     </div>
   );
 }

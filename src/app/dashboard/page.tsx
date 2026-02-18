@@ -11,13 +11,14 @@ import Link from "next/link";
 import { CalculationResult } from "@/utils/types";
 import { getHistory, formatCurrency, formatKwh } from "@/utils/helpers";
 import { ENERGY_TIPS } from "@/utils/constants";
+import TipsModal from "@/components/TipsModal";
 import {
   HiOutlineLightningBolt,
   HiOutlineCurrencyDollar,
   HiOutlineCalendar,
   HiOutlineChartBar,
 } from "react-icons/hi";
-import { HiOutlineCalculator, HiOutlineLightBulb } from "react-icons/hi2";
+import { HiOutlineCalculator, HiOutlineLightBulb, HiOutlineSparkles } from "react-icons/hi2";
 
 const EnergyPieChart = lazy(
   () => import("@/components/charts/EnergyPieChart")
@@ -40,6 +41,7 @@ export default function DashboardPage() {
   const [latestResult, setLatestResult] = useState<CalculationResult | null>(
     null
   );
+  const [isTipsOpen, setIsTipsOpen] = useState(false);
 
   useEffect(() => {
     const h = getHistory();
@@ -65,8 +67,9 @@ export default function DashboardPage() {
     <div className="min-h-screen p-4 md:p-6 space-y-6">
       {/* Header */}
       <motion.div
-        initial={{ opacity: 0, y: -10 }}
+        initial={{ opacity: 0, y: -5 }}
         animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25 }}
       >
         <h1 className="text-2xl md:text-3xl font-bold text-dark-50">
           Dashboard
@@ -205,10 +208,24 @@ export default function DashboardPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
       >
-        <h2 className="text-lg font-semibold text-dark-50 mb-4 flex items-center gap-2">
-          <HiOutlineLightBulb className="w-5 h-5 text-yellow-400" />
-          Energy Saving Tips
-        </h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-dark-50 flex items-center gap-2">
+            <HiOutlineLightBulb className="w-5 h-5 text-yellow-400" />
+            Energy Saving Tips
+          </h2>
+          {latestResult && (
+            <motion.button
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.96 }}
+              onClick={() => setIsTipsOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-primary-500 to-accent-500 text-white text-sm font-medium
+                         hover:shadow-lg hover:shadow-primary-500/25 transition-all duration-300"
+            >
+              <HiOutlineSparkles className="w-4 h-4" />
+              Get AI Tips
+            </motion.button>
+          )}
+        </div>
         <div className="grid sm:grid-cols-3 gap-4">
           {randomTips.map((tip, idx) => (
             <motion.div
@@ -229,6 +246,15 @@ export default function DashboardPage() {
           ))}
         </div>
       </motion.div>
+
+      {/* TipsModal — AI-powered tips panel */}
+      {latestResult && (
+        <TipsModal
+          isOpen={isTipsOpen}
+          onClose={() => setIsTipsOpen(false)}
+          result={latestResult}
+        />
+      )}
 
       {/* Recent history preview */}
       {history.length > 0 && (

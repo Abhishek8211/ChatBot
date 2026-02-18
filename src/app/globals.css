@@ -2,6 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===== First-paint visibility fix =====
+   Framer Motion sets initial opacity:0 via inline styles.
+   Before JS hydrates, elements are invisible, causing a blank
+   flash. This @keyframes + animation forces opacity:1 on the
+   very first paint frame so content is always visible.
+   Once React hydrates, Framer Motion takes over inline styles. */
+@keyframes fm-hydrate {
+  from { opacity: 1; }
+  to   { opacity: 1; }
+}
+main, header, aside {
+  animation: fm-hydrate 0s 0.1s both;
+}
+
 /* ===== Custom Cursor — hide native cursor on desktop ===== */
 .custom-cursor-active,
 .custom-cursor-active * {
