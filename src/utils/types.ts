@@ -81,7 +81,8 @@ export type ChatStep =
   | "add_more"
   | "calculating"
   | "result"
-  | "tips";
+  | "tips"
+  | "free_ask";
 
 /** Energy saving tip */
 export interface EnergySavingTip {
