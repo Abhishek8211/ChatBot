@@ -210,6 +210,7 @@ export default function ChatBot({ onCalculationComplete }: ChatBotProps) {
   });
 
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const lastMsgRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   /** Play a subtle UI sound effect */
@@ -248,9 +249,14 @@ export default function ChatBot({ onCalculationComplete }: ChatBotProps) {
     localStorage.setItem("theme", darkMode ? "dark" : "light");
   }, [darkMode]);
 
-  // Scroll to bottom on new messages
+  // Scroll to latest message — shows the TOP of the new message
+  // so long content like tips is readable from the start
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (lastMsgRef.current) {
+      lastMsgRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    } else {
+      chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
   }, [messages, isTyping]);
 
   // Fetch electricity rate on mount
@@ -267,15 +273,18 @@ export default function ChatBot({ onCalculationComplete }: ChatBotProps) {
       .catch(() => {});
   }, []);
 
-  // Send greeting on mount
+  // Send greeting on mount — instant, no artificial delay
+  // Guard prevents duplicate in React Strict Mode (dev double-mount)
+  const greetingSent = useRef(false);
   useEffect(() => {
-    const timer = setTimeout(() => {
-      addBotMessage(
-        `👋 Hello! I'm <strong>EnergyIQ</strong>, your smart energy assistant.<br/><br/>I'll help you calculate your monthly electricity consumption and cost.<br/><br/>Let's start — <strong>how many electrical devices</strong> do you use at home?`,
-      );
-      setStep("ask_device_count");
-    }, 800);
-    return () => clearTimeout(timer);
+    if (greetingSent.current) return;
+    greetingSent.current = true;
+    addBotMessage(
+      `👋 Hello! I'm <strong>EnergyIQ</strong>, your smart energy assistant.<br/><br/>I'll help you calculate your monthly electricity consumption and cost.<br/><br/>Let's start — <strong>how many electrical devices</strong> do you use at home?`,
+      undefined,
+      true,
+    );
+    setStep("ask_device_count");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -310,7 +319,7 @@ export default function ChatBot({ onCalculationComplete }: ChatBotProps) {
           },
         ]);
         playSound("receive");
-      }, 300);
+      }, 100);
     },
     [playSound],
   );
@@ -449,7 +458,8 @@ export default function ChatBot({ onCalculationComplete }: ChatBotProps) {
         const minOnly = input.match(/^(\d+(?:\.\d+)?)\s*m(?:in)?$/i);
 
         if (hhmm) {
-          hours = parseFloat(hhmm[1]) + (hhmm[2] ? parseFloat(hhmm[2]) / 60 : 0);
+          hours =
+            parseFloat(hhmm[1]) + (hhmm[2] ? parseFloat(hhmm[2]) / 60 : 0);
         } else if (minOnly) {
           hours = parseFloat(minOnly[1]) / 60;
         } else {
@@ -459,8 +469,8 @@ export default function ChatBot({ onCalculationComplete }: ChatBotProps) {
         if (isNaN(hours) || hours < 1 / 60 || hours > 24) {
           addBotMessage(
             "⚠️ Please enter a valid duration.<br/><br/>" +
-            "Examples: <code>2</code> (hours), <code>30m</code> (minutes), <code>1h30m</code> (mixed)<br/>" +
-            "Range: 1 minute to 24 hours."
+              "Examples: <code>2</code> (hours), <code>30m</code> (minutes), <code>1h30m</code> (mixed)<br/>" +
+              "Range: 1 minute to 24 hours.",
           );
           return;
         }
@@ -480,11 +490,12 @@ export default function ChatBot({ onCalculationComplete }: ChatBotProps) {
         const monthlyKwh = dailyKwh * 30;
 
         // Format display time nicely
-        const displayTime = device.hoursPerDay >= 1
-          ? (device.hoursPerDay % 1 === 0
+        const displayTime =
+          device.hoursPerDay >= 1
+            ? device.hoursPerDay % 1 === 0
               ? `${device.hoursPerDay}h`
-              : `${Math.floor(device.hoursPerDay)}h ${Math.round((device.hoursPerDay % 1) * 60)}m`)
-          : `${Math.round(device.hoursPerDay * 60)}m`;
+              : `${Math.floor(device.hoursPerDay)}h ${Math.round((device.hoursPerDay % 1) * 60)}m`
+            : `${Math.round(device.hoursPerDay * 60)}m`;
 
         const newDevices = [...devices, device];
         setDevices(newDevices);
@@ -538,7 +549,7 @@ export default function ChatBot({ onCalculationComplete }: ChatBotProps) {
                 `🌍 Rate: ${rateData.currency}${rateData.rate}/kWh (${rateData.country})<br/><br/>` +
                 `Check the <strong>Charts</strong> section below for visual breakdown! 📈<br/>` +
                 `You can also download a <strong>PDF report</strong> or view your <strong>History</strong>.<br/><br/>` +
-                `Type <code>reset</code> to calculate again, or <code>tips</code> for energy-saving advice! 💡`,
+                `Type <code>reset</code> to calculate again, <code>tips</code> for energy-saving advice, or <strong>ask me any electricity question</strong>! 💡`,
             );
           }, 1500);
         }
@@ -546,7 +557,8 @@ export default function ChatBot({ onCalculationComplete }: ChatBotProps) {
       }
 
       case "result":
-      case "tips": {
+      case "tips":
+      case "free_ask": {
         if (userInput.toLowerCase() === "reset") {
           setDevices([]);
           setCurrentDevice({});
@@ -569,16 +581,74 @@ export default function ChatBot({ onCalculationComplete }: ChatBotProps) {
               `5. ⭐ Buy <strong>5-star rated</strong> appliances — up to 45% less energy.<br/>` +
               `6. ☀️ Use <strong>natural light</strong> during daytime.<br/>` +
               `7. 🧺 Run washing machines on <strong>full loads</strong> only.<br/><br/>` +
-              `Type <code>reset</code> to calculate again!`,
+              `Type <code>reset</code> to calculate again or ask me any electricity question!`,
             undefined,
             true,
           );
         } else {
-          addBotMessage(
-            "Type <code>reset</code> to start a new calculation, or <code>tips</code> for energy-saving advice!",
-            undefined,
-            true,
-          );
+          // Free-form electricity question → send to Gemini
+          setStep("free_ask");
+          setIsTyping(true);
+          fetch("/api/gemini-chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ question: userInput }),
+          })
+            .then(async (res) => {
+              const data = await res.json();
+              setIsTyping(false);
+
+              if (!res.ok) {
+                // API returned an error status
+                const errMsg = data.error || "Something went wrong. Please try again.";
+                setMessages((prev) => [
+                  ...prev,
+                  {
+                    id: generateId(),
+                    role: "bot",
+                    content:
+                      `⚠️ ${errMsg}<br/><br/>` +
+                      `Feel free to ask another question, type <code>reset</code> to calculate again, or <code>tips</code> for energy-saving advice!`,
+                    timestamp: new Date(),
+                  },
+                ]);
+                playSound("receive");
+                return;
+              }
+
+              const answer = (
+                data.answer ||
+                "Sorry, I couldn't get an answer."
+              ).replace(/\n/g, "<br/>");
+              setMessages((prev) => [
+                ...prev,
+                {
+                  id: generateId(),
+                  role: "bot",
+                  content:
+                    `🤖 <strong>AI Answer:</strong><br/><br/>${answer}<br/><br/>` +
+                    `Feel free to ask another question, type <code>reset</code> to calculate again, or <code>tips</code> for energy-saving advice!`,
+                  timestamp: new Date(),
+                },
+              ]);
+              playSound("receive");
+            })
+            .catch((err) => {
+              console.error("Gemini chat fetch error:", err);
+              setIsTyping(false);
+              setMessages((prev) => [
+                ...prev,
+                {
+                  id: generateId(),
+                  role: "bot",
+                  content:
+                    "⚠️ Sorry, I couldn't reach the AI service right now. Please try again in a moment.<br/><br/>" +
+                    "Type <code>reset</code> to start a new calculation, or <code>tips</code> for energy-saving advice!",
+                  timestamp: new Date(),
+                },
+              ]);
+              playSound("receive");
+            });
         }
         break;
       }
@@ -645,6 +715,7 @@ export default function ChatBot({ onCalculationComplete }: ChatBotProps) {
         ];
       case "result":
       case "tips":
+      case "free_ask":
         return [
           { label: "🔄 Reset", value: "reset" },
           { label: "💡 Tips", value: "tips" },
@@ -660,7 +731,12 @@ export default function ChatBot({ onCalculationComplete }: ChatBotProps) {
   /** Calculate progress percentage for the progress bar */
   const getProgress = (): number => {
     if (totalDeviceCount === 0) return 0;
-    if (step === "result" || step === "tips" || step === "calculating")
+    if (
+      step === "result" ||
+      step === "tips" ||
+      step === "calculating" ||
+      step === "free_ask"
+    )
       return 100;
 
     const stepsPerDevice = 4;
@@ -759,8 +835,13 @@ export default function ChatBot({ onCalculationComplete }: ChatBotProps) {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         <AnimatePresence>
-          {messages.map((msg) => (
-            <ChatBubble key={msg.id} message={msg} />
+          {messages.map((msg, idx) => (
+            <div
+              key={msg.id}
+              ref={idx === messages.length - 1 ? lastMsgRef : undefined}
+            >
+              <ChatBubble message={msg} />
+            </div>
           ))}
         </AnimatePresence>
         {isTyping && <TypingIndicator />}
@@ -821,7 +902,9 @@ export default function ChatBot({ onCalculationComplete }: ChatBotProps) {
                       ? "Enter wattage or type 'auto'..."
                       : step === "ask_hours"
                         ? "e.g. 2, 30m, 1h30m..."
-                        : "Type a message..."
+                        : step === "free_ask"
+                          ? "Ask any electricity question..."
+                          : "Type a message..."
             }
             className="flex-1 px-4 py-2.5 rounded-xl glass text-sm text-dark-50 placeholder-dark-300 focus:outline-none focus:ring-1 focus:ring-primary-500/50 transition-all"
           />

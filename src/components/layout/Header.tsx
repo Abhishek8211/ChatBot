@@ -17,8 +17,9 @@ interface HeaderProps {
 export default function Header({ onToggleSidebar }: HeaderProps) {
   return (
     <motion.header
-      initial={{ y: -20, opacity: 0 }}
+      initial={{ y: -8, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.25 }}
       className="sticky top-0 z-50 glass border-b border-white/5"
     >
       <div className="flex items-center justify-between px-4 py-3 md:px-6">
