@@ -1,77 +1,96 @@
-# ⚡ EnergyIQ — Smart Energy Consumption Calculator Chatbot
+<div align="center">
 
-A modern, AI-powered chatbot web application that calculates home energy consumption based on user device inputs. It fetches real-time electricity tariff data, calculates total energy usage in kWh, and estimates monthly cost — all through a conversational chatbot interface with smart suggestions, visual charts, and export options.
+# ⚡ EnergyIQ — AI-Powered Home Energy Optimizer
 
-![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js)
-![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3-38bdf8?logo=tailwindcss)
-![Framer Motion](https://img.shields.io/badge/Framer_Motion-12-ff69b4?logo=framer)
-![License](https://img.shields.io/badge/License-MIT-green)
+### 🏠 Calculate, Analyze & Reduce Your Electricity Costs
+
+[![Next.js](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![Gemini AI](https://img.shields.io/badge/Gemini-AI-8E75B2?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev/)
+[![Framer Motion](https://img.shields.io/badge/Framer_Motion-12-FF0055?style=for-the-badge&logo=framer&logoColor=white)](https://www.framer.com/motion/)
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+
+**Chat with our AI to calculate your home electricity consumption, explore live rates across 50+ countries, get Gemini-powered saving tips, and download detailed PDF reports — all through a stunning conversational interface.**
+
+[🚀 Live Demo](#) · [📖 Features](#-features) · [🛠️ Setup](#-getting-started) · [📸 Screenshots](#️-preview)
 
 ---
+
+</div>
 
 ## 🖼️ Preview
 
-| Landing Page          | Calculator Chatbot     | Results & Charts       |
-| --------------------- | ---------------------- | ---------------------- |
-| Hero + animated stats | Conversational AI flow | Pie, bar & cost charts |
+| Landing Page | Calculator Chatbot | Live Rates Explorer |
+|---|---|---|
+| Hero + animated stats + rate preview | Conversational AI flow with country selection | 50+ countries with search, filters & sort |
+
+| Dashboard | History | AI Tips |
+|---|---|---|
+| Stats, charts & cost analysis | Past calculations viewer | Gemini-powered recommendations |
 
 ---
 
-## 🚀 Features
+## ✨ Features
 
-### Core
+### 🔋 Core
 
-- **AI Chatbot** — Step-by-step conversational flow to input devices and calculate energy
-- **Real-time Rates** — Mock API with rates for 8 countries (India, USA, UK, Germany, etc.)
-- **Visual Charts** — Pie chart (device distribution), Bar chart (daily vs monthly), Cost breakdown
-- **PDF Reports** — Download detailed energy reports with device breakdowns
-- **Calculation History** — All calculations saved in localStorage
-- **Energy Saving Tips** — Smart tips shown after every calculation
+| Feature | Description |
+|---------|-------------|
+| 🤖 **AI Chatbot Calculator** | Step-by-step conversational flow to input devices and calculate energy costs |
+| 🧠 **Gemini AI Tips** | Personalized energy-saving recommendations powered by Google Gemini 2.0 Flash |
+| 🌍 **50+ Country Rates** | Electricity rates across 6 regions with local currency + USD conversion |
+| 📊 **Smart Dashboard** | Visual breakdown with pie charts, bar charts & cost analysis |
+| 📜 **Calculation History** | All calculations saved in localStorage with full detail |
+| 📥 **PDF Reports** | Download detailed energy reports with device breakdowns and tips |
 
-### Advanced
+### 🚀 Advanced
 
-- **🤖 AI-Powered Suggestions** — Personalized energy-saving recommendations based on your devices, with priority levels (high/medium/low) and estimated savings
-- **🎉 Confetti Celebration** — Canvas confetti animation fires when calculation completes
-- **📸 Share as Image** — Capture results section as a PNG screenshot using html2canvas
-- **🐦 Share on Twitter** — Pre-filled tweet with your energy stats and cost breakdown
-- **📊 Export to CSV** — Download device data, totals, and rate info as a `.csv` file
-- **💡 Tooltip Education** — Hover over device buttons to see average wattage, energy tips, and fun facts
-- **📈 Animated Landing Stats** — Live personal stats (calculations done, kWh tracked, devices analyzed) pulled from localStorage history
+| Feature | Description |
+|---------|-------------|
+| 🌐 **Country Selection** | Choose your country at the start — rates fetched automatically |
+| 🔍 **Rate Explorer** | Beautiful rates page with search, region filters, sort & price bars |
+| 🤖 **AI Suggestions** | Personalized tips with priority levels (high/medium/low) and savings estimates |
+| 🎉 **Confetti Celebration** | Canvas confetti animation fires when calculation completes |
+| 📸 **Share as Image** | Capture results as a PNG screenshot using html2canvas |
+| 🐦 **Share on Twitter** | Pre-filled tweet with your energy stats and cost breakdown |
+| 📊 **Export to CSV** | Download device data, totals, and rate info as `.csv` |
+| 💡 **Tooltip Education** | Hover device buttons to see wattage, tips, and fun facts |
 
-### UI/UX
+### 🎨 UI/UX
 
-- **🎨 Theme Toggle** — Switch between dark and light mode (persisted in localStorage)
-- **🔊 Sound Effects** — Subtle audio feedback on send/receive/complete (toggleable)
-- **⏱️ Hover Timestamps** — Hover any chat bubble to see the exact send time
-- **📊 Progress Bar** — Visual progress of device input completion
-- **⌨️ Keyboard Shortcuts** — Press 1–9 to tap quick action buttons
-- **↩️ Undo Last Device** — Remove the last added device with one click
-- **💰 Running Cost Preview** — Floating badge showing estimated cost as you add devices
-- **⚡ Instant Responses** — Quick-tap buttons trigger instant bot replies (no typing delay)
-- **📱 Mobile Responsive** — Fully responsive with sidebar navigation
-- **✨ Glassmorphism UI** — Futuristic dark-themed glass cards with gradient accents
-- **🎞️ Framer Motion** — Smooth page transitions, chat animations, chart reveals
-- **🔢 Animated Counters** — CountUp animations for all numeric values
+| Feature | Description |
+|---------|-------------|
+| 🌙 **Theme Toggle** | Dark/light mode with full glassmorphism support (persisted) |
+| 🔊 **Sound Effects** | Subtle audio feedback on send/receive/complete (toggleable) |
+| ⏱️ **Hover Timestamps** | Hover any chat bubble to see the exact send time |
+| 📊 **Progress Bar** | Visual progress of device input completion |
+| ⌨️ **Keyboard Shortcuts** | Press `1`–`9` to tap quick action buttons |
+| ↩️ **Undo Last Device** | Remove the last added device with one click |
+| 💰 **Running Cost Preview** | Floating badge showing estimated cost as you add devices |
+| ⚡ **Turbopack Dev** | Blazing fast development with Next.js Turbopack |
+| ✨ **Glassmorphism UI** | Futuristic dark-themed glass cards with gradient accents |
+| 🎞️ **Framer Motion** | Smooth page transitions, chat animations, chart reveals |
+| 📱 **Fully Responsive** | Works beautifully on desktop, tablet & mobile |
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Layer         | Technology              |
-| ------------- | ----------------------- |
-| Framework     | Next.js 14 (App Router) |
-| Language      | TypeScript 5            |
-| Styling       | Tailwind CSS 3          |
-| Animations    | Framer Motion 12        |
-| Charts        | Recharts 3              |
-| PDF           | jsPDF + jspdf-autotable |
-| Screenshots   | html2canvas             |
-| Confetti      | canvas-confetti         |
-| Notifications | react-hot-toast         |
-| Icons         | react-icons             |
-| Counters      | react-countup           |
-| HTTP          | Axios                   |
+```
+Frontend     →  Next.js 14 (App Router) · React 18 · TypeScript 5
+Styling      →  Tailwind CSS 3 · Glassmorphism dark/light theme
+AI Engine    →  Google Gemini 2.0 Flash (chat + tips)
+Animations   →  Framer Motion 12
+Charts       →  Recharts 3 (lazy loaded)
+PDF Export   →  jsPDF + html2canvas
+Confetti     →  canvas-confetti
+Notifications→  react-hot-toast
+Icons        →  react-icons (hi, hi2)
+Counters     →  react-countup
+HTTP         →  Axios
+Dev Server   →  Turbopack (instant HMR)
+```
 
 ---
 
@@ -79,52 +98,75 @@ A modern, AI-powered chatbot web application that calculates home energy consump
 
 ```
 energy-calculator/
-├── public/
 ├── src/
 │   ├── app/
 │   │   ├── api/
 │   │   │   ├── ai-suggestions/
-│   │   │   │   └── route.ts              # POST — AI-powered energy suggestions
+│   │   │   │   └── route.ts               # POST — AI-powered energy suggestions
 │   │   │   ├── electricity-rate/
-│   │   │   │   └── route.ts              # GET  — Electricity rate by country
-│   │   │   └── energy-tips/
-│   │   │       └── route.ts              # GET  — Random energy-saving tips
+│   │   │   │   ├── route.ts               # GET  — Single country rate
+│   │   │   │   └── all/
+│   │   │   │       └── route.ts           # GET  — All 50+ country rates + USD
+│   │   │   ├── energy-tips/
+│   │   │   │   └── route.ts               # GET  — Random energy-saving tips
+│   │   │   ├── gemini-chat/
+│   │   │   │   └── route.ts               # POST — Gemini AI chat completions
+│   │   │   └── gemini-tips/
+│   │   │       └── route.ts               # POST — Gemini AI energy tips
 │   │   ├── calculator/
-│   │   │   └── page.tsx                  # Calculator page (chat + charts + share)
+│   │   │   └── page.tsx                   # Calculator page (chat + charts)
 │   │   ├── dashboard/
-│   │   │   └── page.tsx                  # Dashboard with stats & charts
+│   │   │   └── page.tsx                   # Dashboard with stats & charts
 │   │   ├── history/
-│   │   │   └── page.tsx                  # Calculation history viewer
-│   │   ├── fonts/                        # Custom fonts (Geist)
-│   │   ├── favicon.ico
-│   │   ├── globals.css                   # Global styles + glassmorphism + light theme
-│   │   ├── layout.tsx                    # Root layout with AppShell
-│   │   └── page.tsx                      # Landing / Home page with animated stats
+│   │   │   └── page.tsx                   # Calculation history viewer
+│   │   ├── rates/
+│   │   │   └── page.tsx                   # 🆕 Global electricity rates explorer
+│   │   ├── globals.css                    # Glassmorphism + light/dark theme
+│   │   ├── layout.tsx                     # Root layout with AppShell
+│   │   └── page.tsx                       # Landing page with live rates preview
 │   ├── components/
 │   │   ├── charts/
-│   │   │   ├── CostBreakdownChart.tsx    # Horizontal cost breakdown chart
-│   │   │   ├── EnergyBarChart.tsx         # Daily vs monthly bar chart
-│   │   │   └── EnergyPieChart.tsx         # Device distribution pie chart
+│   │   │   ├── CostBreakdownChart.tsx     # Horizontal cost breakdown
+│   │   │   ├── EnergyBarChart.tsx          # Daily vs monthly bar chart
+│   │   │   └── EnergyPieChart.tsx          # Device distribution pie chart
 │   │   ├── layout/
-│   │   │   ├── AppShell.tsx              # Main layout wrapper with sidebar
-│   │   │   ├── Header.tsx                # Sticky header with theme toggle
-│   │   │   └── Sidebar.tsx               # Navigation sidebar
-│   │   ├── ChatBot.tsx                   # Main chatbot component (all features)
-│   │   └── ThemeToggle.tsx               # Dark/light theme toggle button
+│   │   │   ├── AppShell.tsx               # Main layout with sidebar
+│   │   │   ├── Header.tsx                 # Sticky header with theme toggle
+│   │   │   └── Sidebar.tsx                # Navigation sidebar (5 pages)
+│   │   ├── ChatBot.tsx                    # Core chatbot engine (~975 lines)
+│   │   ├── CustomCursor.tsx               # Custom animated cursor
+│   │   ├── ThemeToggle.tsx                # Dark/light toggle button
+│   │   └── TipsModal.tsx                  # AI tips modal
+│   ├── hooks/
+│   │   ├── useCustomCursor.ts             # Cursor tracking hook
+│   │   └── useGeminiTips.ts               # Gemini tips fetcher hook
 │   └── utils/
-│       ├── constants.ts                  # Device data, wattages, icons, tooltips, AI rules, tips
-│       ├── helpers.ts                    # Calculations, localStorage, CSV export, share helpers
-│       ├── pdf.ts                        # PDF report generation
-│       └── types.ts                      # TypeScript interfaces & types
-├── .eslintrc.json
-├── .gitignore
-├── next.config.mjs
+│       ├── constants.ts                   # Device data, wattages, icons, tooltips
+│       ├── geminiPromptBuilder.ts         # Gemini prompt construction
+│       ├── helpers.ts                     # Calculations, localStorage, CSV, share
+│       ├── pdf.ts                         # PDF report generation
+│       └── types.ts                       # TypeScript interfaces & types
+├── .env.local                             # API keys (not committed)
+├── next.config.mjs                        # Next.js config with optimizePackageImports
+├── tailwind.config.ts                     # Custom color palette & animations
 ├── package.json
-├── postcss.config.mjs
-├── tailwind.config.ts
-├── tsconfig.json
 └── README.md
 ```
+
+---
+
+## 🌍 Supported Countries (50+)
+
+> Rates in local currency with USD equivalent, organized by region
+
+| Region | Countries |
+|--------|-----------|
+| 🌏 **Asia** | 🇮🇳 India · 🇯🇵 Japan · 🇨🇳 China · 🇰🇷 South Korea · 🇸🇬 Singapore · 🇮🇩 Indonesia · 🇲🇾 Malaysia · 🇹🇭 Thailand · 🇻🇳 Vietnam · 🇵🇭 Philippines · 🇵🇰 Pakistan · 🇧🇩 Bangladesh · 🇱🇰 Sri Lanka · 🇳🇵 Nepal |
+| 🏜️ **Middle East** | 🇦🇪 UAE · 🇸🇦 Saudi Arabia · 🇶🇦 Qatar · 🇰🇼 Kuwait · 🇮🇱 Israel |
+| 🏰 **Europe** | 🇬🇧 UK · 🇩🇪 Germany · 🇫🇷 France · 🇮🇹 Italy · 🇪🇸 Spain · 🇳🇱 Netherlands · 🇧🇪 Belgium · 🇸🇪 Sweden · 🇳🇴 Norway · 🇩🇰 Denmark · 🇫🇮 Finland · 🇨🇭 Switzerland · 🇦🇹 Austria · 🇵🇹 Portugal · 🇮🇪 Ireland · 🇵🇱 Poland · 🇬🇷 Greece · 🇹🇷 Turkey |
+| 🌎 **Americas** | 🇺🇸 USA · 🇨🇦 Canada · 🇲🇽 Mexico · 🇧🇷 Brazil · 🇦🇷 Argentina · 🇨🇴 Colombia · 🇨🇱 Chile · 🇵🇪 Peru |
+| 🌍 **Africa** | 🇿🇦 South Africa · 🇳🇬 Nigeria · 🇪🇬 Egypt · 🇰🇪 Kenya · 🇬🇭 Ghana · 🇪🇹 Ethiopia |
+| 🏝️ **Oceania** | 🇦🇺 Australia · 🇳🇿 New Zealand |
 
 ---
 
@@ -143,47 +185,50 @@ Each device is calculated individually, then aggregated for total daily/monthly 
 
 ### `GET /api/electricity-rate?country=india`
 
-Returns electricity rate for the specified country.
+Returns the electricity rate for a single country in local currency.
 
 ```json
 {
   "country": "India",
   "rate_per_kwh": 8,
   "currency": "₹",
-  "last_updated": "2026-02-17T..."
+  "last_updated": "2026-02-19T...",
+  "source": "database"
 }
 ```
 
-**Supported countries:** `india`, `usa`, `uk`, `germany`, `australia`, `canada`, `japan`, `brazil`
+### `GET /api/electricity-rate/all`
 
-### `GET /api/energy-tips`
-
-Returns 4 random energy-saving tips with icon, title, and description.
-
-### `POST /api/ai-suggestions`
-
-Generates personalized AI-powered energy-saving suggestions based on actual device usage.
-
-**Request body:**
+Returns all 50+ country rates with USD equivalents, flags, and regions.
 
 ```json
 {
-  "devices": [
+  "count": 53,
+  "last_updated": "2026-02-19T...",
+  "rates": [
     {
-      "type": "AC",
-      "quantity": 2,
-      "wattage": 1500,
-      "hoursPerDay": 8,
-      "monthlyKwh": 720,
-      "monthlyCost": 5760
+      "country": "India",
+      "rate_per_kwh": 8.0,
+      "currency": "₹",
+      "usd_per_kwh": 0.0964,
+      "flag": "🇮🇳",
+      "region": "Asia"
     }
-  ],
-  "totalMonthlyCost": 5760,
-  "currency": "₹"
+  ]
 }
 ```
 
-**Response:**
+### `POST /api/gemini-chat`
+
+Sends a message to Google Gemini 2.0 Flash and returns the AI response for the chatbot conversation.
+
+### `POST /api/gemini-tips`
+
+Generates personalized energy-saving tips using Gemini AI based on device usage data.
+
+### `POST /api/ai-suggestions`
+
+Rule-based energy-saving suggestions with priority levels and savings estimates.
 
 ```json
 {
@@ -191,7 +236,7 @@ Generates personalized AI-powered energy-saving suggestions based on actual devi
     {
       "icon": "❄️",
       "title": "AC Optimization",
-      "description": "Consider upgrading to a 5-star inverter AC — saves up to 40% energy",
+      "description": "Upgrade to a 5-star inverter AC — saves up to 40% energy",
       "savingsEstimate": "Save ~₹1152/mo (15-30%)",
       "priority": "high"
     }
@@ -200,6 +245,32 @@ Generates personalized AI-powered energy-saving suggestions based on actual devi
 }
 ```
 
+### `GET /api/energy-tips`
+
+Returns 4 random energy-saving tips with icons and descriptions.
+
+---
+
+## 📊 Supported Devices (15)
+
+| Device | Icon | Default Wattage |
+|--------|------|-----------------|
+| AC | ❄️ | 1500W |
+| Fan | 🌀 | 75W |
+| TV | 📺 | 120W |
+| Refrigerator | 🧊 | 200W |
+| Washing Machine | 🧺 | 500W |
+| Microwave | 📡 | 1200W |
+| Water Heater | 🔥 | 3000W |
+| Light Bulb | 💡 | 60W |
+| Computer | 💻 | 300W |
+| Iron | 👔 | 1000W |
+| Hair Dryer | 💇 | 1800W |
+| Dishwasher | 🍽️ | 1800W |
+| Electric Stove | 🍳 | 2000W |
+| Router | 📶 | 12W |
+| Phone Charger | 🔌 | 5W |
+
 ---
 
 ## 🏃 Getting Started
@@ -207,7 +278,7 @@ Generates personalized AI-powered energy-saving suggestions based on actual devi
 ### Prerequisites
 
 - **Node.js** 18+ ([download](https://nodejs.org/))
-- **npm** (comes with Node.js)
+- **Google Gemini API Key** → [Get one here](https://aistudio.google.com/app/apikey)
 
 ### Installation
 
@@ -216,16 +287,27 @@ Generates personalized AI-powered energy-saving suggestions based on actual devi
 git clone https://github.com/Abhishek8211/ChatBot.git
 
 # Navigate to project directory
-cd energy-calculator
+cd ChatBot/energy-calculator
 
 # Install dependencies
 npm install
 
-# Start development server
+# Create environment file
+cp .env.example .env.local
+```
+
+Add your API key to `.env.local`:
+
+```env
+GEMINI_API_KEY=your_gemini_api_key_here
+```
+
+```bash
+# Start development server (with Turbopack ⚡)
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open [http://localhost:3000](http://localhost:3000) 🎉
 
 ### Production Build
 
@@ -236,69 +318,52 @@ npm start
 
 ---
 
-## 📊 Supported Devices (15)
+## 🗂️ Export Options
 
-| Device          | Icon | Default Wattage |
-| --------------- | ---- | --------------- |
-| AC              | ❄️   | 1500W           |
-| Fan             | 🌀   | 75W             |
-| TV              | 📺   | 120W            |
-| Refrigerator    | 🧊   | 200W            |
-| Washing Machine | 🧺   | 500W            |
-| Microwave       | 📡   | 1200W           |
-| Water Heater    | 🔥   | 3000W           |
-| Light Bulb      | 💡   | 60W             |
-| Computer        | 💻   | 300W            |
-| Iron            | 👔   | 1000W           |
-| Hair Dryer      | 💇   | 1800W           |
-| Dishwasher      | 🍽️   | 1800W           |
-| Electric Stove  | 🍳   | 2000W           |
-| Router          | 📶   | 12W             |
-| Phone Charger   | 🔌   | 5W              |
-
----
-
-## 🎨 UI Design
-
-- **Dark mode** by default with glassmorphism cards
-- **Light mode** with comprehensive theme overrides
-- **Gradient accent** colors (teal `#20c997` → blue `#339af0`)
-- **ChatGPT-style** conversational interface with typing indicators
-- **Apple-inspired** dashboard layout
-- **Smooth animations** on every interaction (Framer Motion)
-- **Mobile-first** responsive design with collapsible sidebar
+| Format | Description |
+|--------|-------------|
+| 📄 **PDF** | Full report with device table, summary, and energy tips |
+| 📊 **CSV** | Spreadsheet-friendly export with device data and totals |
+| 📸 **PNG Image** | Screenshot of results section via html2canvas |
+| 🐦 **Twitter** | Pre-filled tweet with energy stats and cost |
 
 ---
 
 ## ⌨️ Keyboard Shortcuts
 
-| Key     | Action                                    |
-| ------- | ----------------------------------------- |
+| Key | Action |
+|-----|--------|
 | `1`–`9` | Tap the corresponding quick action button |
-| `Enter` | Send typed message                        |
+| `Enter` | Send typed message |
 
 ---
 
-## 🗂️ Export Options
+## 🧠 AI Engines
 
-| Format        | Description                                             |
-| ------------- | ------------------------------------------------------- |
-| **PDF**       | Full report with device table, summary, and energy tips |
-| **CSV**       | Spreadsheet-friendly export with device data and totals |
-| **PNG Image** | Screenshot of results section via html2canvas           |
-| **Twitter**   | Pre-filled tweet with energy stats and cost             |
+### Gemini AI Chat & Tips
+- Powered by **Google Gemini 2.0 Flash**
+- Contextual energy-saving advice based on your actual devices
+- Fallback tips if API key is not set
 
----
-
-## 🧠 AI Suggestion Engine
-
-The AI suggestion engine analyzes your specific device configuration and generates personalized recommendations:
-
+### Rule-Based Suggestion Engine
 1. **Devices sorted by cost** — highest consumers get priority
-2. **Rule-based tips** — curated suggestions per device type from `AI_SUGGESTION_RULES`
+2. **Curated tips** per device type from `AI_SUGGESTION_RULES`
 3. **Priority classification** — `high` (>30% of bill), `medium` (>10%), `low` (<10%)
-4. **Savings estimates** — calculated based on actual usage data
-5. **General suggestions** — solar panels (if bill > ₹500), smart home automation (if 5+ devices)
+4. **Savings estimates** — calculated from actual usage data
+5. **General suggestions** — solar panels (if bill > ₹500), smart home (if 5+ devices)
+
+---
+
+## 🎨 Design System
+
+| Element | Value |
+|---------|-------|
+| Primary | Teal `#20c997` → Blue `#339af0` gradient |
+| Background | Dark `#101113` / Light `#f8f9fa` |
+| Cards | Glassmorphism with subtle borders |
+| Animations | Framer Motion spring + fade-in-up |
+| Typography | System font stack (SF Pro, Segoe UI, Roboto) |
+| Layout | Sidebar + content with sticky header |
 
 ---
 
@@ -308,4 +373,10 @@ MIT — free to use, modify, and distribute.
 
 ---
 
-Built with 💚 by [Abhishek](https://github.com/Abhishek8211) for a greener planet.
+<div align="center">
+
+**Built with 💚 by [Abhishek](https://github.com/Abhishek8211) for a greener planet 🌍**
+
+⭐ **Star this repo if you found it useful!**
+
+</div>
