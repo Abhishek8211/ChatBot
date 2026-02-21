@@ -4,11 +4,9 @@
 // Landing / Home Page — Hero + Features + Stats
 // ============================================
 
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import CountUp from "react-countup";
-import { getAggregatedStats } from "@/utils/helpers";
 import {
   HiOutlineLightningBolt,
   HiOutlineChartBar,
@@ -16,6 +14,7 @@ import {
   HiOutlineDownload,
   HiOutlineClock,
   HiOutlineGlobe,
+  HiOutlineCurrencyDollar,
 } from "react-icons/hi";
 
 const fadeInUp = {
@@ -69,24 +68,22 @@ const features = [
 
 const stats = [
   { end: 15, suffix: "+", label: "Device Types" },
-  { end: 8, suffix: "", label: "Countries" },
+  { end: 50, suffix: "+", label: "Countries" },
   { end: 100, suffix: "%", label: "Free Forever" },
   { end: 30, suffix: "s", label: "Quick Calculation" },
 ];
 
-export default function Home() {
-  const [liveStats, setLiveStats] = useState<{
-    totalCalculations: number;
-    totalKwhTracked: number;
-    totalDevicesTracked: number;
-  } | null>(null);
+/** Preview rates shown on home page */
+const previewRates = [
+  { flag: "🇮🇳", country: "India", rate: "₹8.00", usd: "$0.10" },
+  { flag: "🇺🇸", country: "USA", rate: "$0.16", usd: "$0.16" },
+  { flag: "🇬🇧", country: "UK", rate: "£0.34", usd: "$0.43" },
+  { flag: "🇩🇪", country: "Germany", rate: "€0.39", usd: "$0.42" },
+  { flag: "🇯🇵", country: "Japan", rate: "¥31.0", usd: "$0.21" },
+  { flag: "🇦🇺", country: "Australia", rate: "A$0.35", usd: "$0.23" },
+];
 
-  useEffect(() => {
-    const data = getAggregatedStats();
-    if (data.totalCalculations > 0) {
-      setLiveStats(data);
-    }
-  }, []);
+export default function Home() {
   return (
     <div className="min-h-screen">
       {/* ===== HERO SECTION ===== */}
@@ -197,43 +194,6 @@ export default function Home() {
           viewport={{ once: true }}
           className="max-w-5xl mx-auto"
         >
-          {/* Live stats banner (shown only after calculations) */}
-          {liveStats && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mb-8 p-4 rounded-2xl bg-gradient-to-r from-primary-500/10 to-accent-500/10 border border-primary-500/15"
-            >
-              <p className="text-center text-xs text-dark-300 mb-3 uppercase tracking-wider">
-                📊 Your Personal Energy Tracking
-              </p>
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div>
-                  <div className="text-2xl font-bold text-primary-400">
-                    <CountUp end={liveStats.totalCalculations} duration={2} />
-                  </div>
-                  <p className="text-xs text-dark-300">Calculations Done</p>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-accent-400">
-                    <CountUp
-                      end={liveStats.totalKwhTracked}
-                      duration={2}
-                      suffix=" kWh"
-                    />
-                  </div>
-                  <p className="text-xs text-dark-300">Energy Tracked</p>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-purple-400">
-                    <CountUp end={liveStats.totalDevicesTracked} duration={2} />
-                  </div>
-                  <p className="text-xs text-dark-300">Devices Analyzed</p>
-                </div>
-              </div>
-            </motion.div>
-          )}
-
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {stats.map((stat, idx) => (
               <motion.div
@@ -306,6 +266,67 @@ export default function Home() {
               );
             })}
           </div>
+        </div>
+      </section>
+
+      {/* ===== LIVE RATES PREVIEW ===== */}
+      <section className="px-4 py-20 border-t border-white/5">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-10"
+          >
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass text-xs text-primary-400 border border-primary-500/20 mb-4">
+              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+              Live Data
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold mb-3">
+              Global Electricity <span className="gradient-text">Rates</span>
+            </h2>
+            <p className="text-dark-200 max-w-xl mx-auto">
+              Compare residential electricity prices across 50+ countries in
+              local currency and USD.
+            </p>
+          </motion.div>
+
+          {/* Preview grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
+            {previewRates.map((r, idx) => (
+              <motion.div
+                key={r.country}
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.06 }}
+                whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                className="glass rounded-xl p-4 text-center hover:energy-glow transition-all duration-300 group cursor-default"
+              >
+                <span className="text-3xl block mb-2">{r.flag}</span>
+                <p className="text-xs text-dark-200 mb-1">{r.country}</p>
+                <p className="text-lg font-bold text-primary-400">{r.rate}</p>
+                <p className="text-[10px] text-dark-300 mt-0.5">
+                  ≈ {r.usd}/kWh
+                </p>
+              </motion.div>
+            ))}
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="text-center"
+          >
+            <Link
+              href="/rates"
+              className="inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-gradient-to-r from-primary-500/15 to-accent-500/15 border border-primary-500/20 text-primary-400 font-semibold hover:from-primary-500/25 hover:to-accent-500/25 hover:shadow-lg hover:shadow-primary-500/10 transition-all duration-300 hover:-translate-y-0.5"
+            >
+              <HiOutlineCurrencyDollar className="w-5 h-5" />
+              View All 50+ Countries
+            </Link>
+          </motion.div>
         </div>
       </section>
 
