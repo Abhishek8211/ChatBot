@@ -9,10 +9,16 @@
    very first paint frame so content is always visible.
    Once React hydrates, Framer Motion takes over inline styles. */
 @keyframes fm-hydrate {
-  from { opacity: 1; }
-  to   { opacity: 1; }
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+  }
 }
-main, header, aside {
+main,
+header,
+aside {
   animation: fm-hydrate 0s 0.1s both;
 }
 
@@ -60,18 +66,12 @@ body {
 /* Glassmorphism utility */
 @layer utilities {
   .glass {
-    background: rgba(26, 27, 30, 0.8);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: rgba(26, 27, 30, 0.9);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    will-change: auto;
   }
   .glass-light {
-    background: rgba(44, 46, 51, 0.6);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    background: rgba(44, 46, 51, 0.75);
     border: 1px solid rgba(255, 255, 255, 0.06);
-    will-change: auto;
   }
   .gradient-text {
     background: linear-gradient(135deg, #20c997 0%, #339af0 100%);
@@ -153,18 +153,14 @@ body {
   background: #868e96;
 }
 
-/* Glass — remove heavy blur in light mode to reduce lag */
+/* Glass — no blur in light mode for max performance */
 .light-theme .glass {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  background: rgba(255, 255, 255, 0.92);
   border-color: rgba(0, 0, 0, 0.1);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 .light-theme .glass-light {
-  background: rgba(241, 243, 245, 0.85);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  background: rgba(241, 243, 245, 0.9);
   border-color: rgba(0, 0, 0, 0.08);
 }
 
