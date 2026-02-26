@@ -1,15 +1,27 @@
 // ============================================
 // POST /api/gemini-chat
-// General-purpose electricity Q&A powered by Gemini.
-// Answers any electricity / energy-related question.
+// General-purpose Q&A powered by OpenRouter.
+// Answers ANY type of question from the chatbot.
+// Uses a fallback chain of free models for reliability.
 //
-// Env var required: GEMINI_API_KEY
+// Env var required: OPENROUTER_API_KEY
 // ============================================
 
 import { NextRequest, NextResponse } from "next/server";
 
-const GEMINI_MODEL = "gemini-2.0-flash";
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
+
+/** Ordered list of free models to try — if one is rate-limited, we try the next */
+const FREE_MODELS = [
+  "google/gemma-3-27b-it:free",
+  "google/gemma-3n-e4b-it:free",
+  "google/gemma-3-12b-it:free",
+  "deepseek/deepseek-r1-0528:free",
+  "nvidia/nemotron-nano-9b-v2:free",
+  "meta-llama/llama-3.3-70b-instruct:free",
+  "qwen/qwen3-4b:free",
+  "mistralai/mistral-small-3.1-24b-instruct:free",
+];
 
 const SYSTEM_PROMPT = `You are EnergyIQ, a smart AI assistant built into a Smart Energy Calculator app. You can answer any question the user asks.
 
@@ -45,114 +57,110 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.OPENROUTER_API_KEY;
 
     if (!apiKey) {
       return NextResponse.json({
         answer:
-          "I'm sorry, the AI service is not configured yet. Please set the GEMINI_API_KEY environment variable to enable AI-powered answers.",
+          "I'm sorry, the AI service is not configured yet. Please set the OPENROUTER_API_KEY environment variable to enable AI-powered answers.",
         source: "fallback",
       });
     }
 
-    const geminiRes = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [
-          {
-            role: "user",
-            parts: [
-              { text: `${SYSTEM_PROMPT}\n\nUser question: ${question.trim()}` },
-            ],
-          },
-        ],
-        generationConfig: {
-          temperature: 0.7,
-          topP: 0.9,
-          topK: 40,
-          maxOutputTokens: 800,
-        },
-      }),
-    });
+    // Try each model in the fallback chain until one succeeds
+    for (const model of FREE_MODELS) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000);
 
-    if (!geminiRes.ok) {
-      const errorText = await geminiRes.text();
-      console.error(
-        `[gemini-chat] Gemini API error ${geminiRes.status}:`,
-        errorText,
-      );
-
-      // Handle rate limiting (429) — retry once after a short delay
-      if (geminiRes.status === 429) {
-        console.log("[gemini-chat] Rate limited, retrying after 2s...");
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-
-        const retryRes = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
+        const res = await fetch(OPENROUTER_URL, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${apiKey}`,
+            "HTTP-Referer": "https://energy-calculator.app",
+            "X-Title": "Smart Energy Calculator",
+          },
           body: JSON.stringify({
-            contents: [
+            model,
+            messages: [
               {
                 role: "user",
-                parts: [
-                  { text: `${SYSTEM_PROMPT}\n\nUser question: ${question.trim()}` },
-                ],
+                content: `${SYSTEM_PROMPT}\n\nUser question: ${question.trim()}`,
               },
             ],
-            generationConfig: {
-              temperature: 0.7,
-              topP: 0.9,
-              topK: 40,
-              maxOutputTokens: 800,
-            },
+            temperature: 0.7,
+            top_p: 0.9,
+            max_tokens: 800,
           }),
+          signal: controller.signal,
         });
 
-        if (retryRes.ok) {
-          const retryData = await retryRes.json();
-          const retryText: string =
-            retryData?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
-          if (retryText) {
-            return NextResponse.json({
-              answer: retryText.trim(),
-              source: "gemini",
-            });
-          }
+        clearTimeout(timeoutId);
+
+        // If rate-limited or server error, try the next model
+        if (res.status === 429 || res.status === 503) {
+          console.warn(
+            `[gemini-chat] ${model} returned ${res.status}, trying next model...`,
+          );
+          continue;
         }
 
-        return NextResponse.json({
-          answer:
-            "The AI service is temporarily busy due to high usage. Please wait a few seconds and try again.",
-          source: "rate_limited",
-        });
-      }
+        if (!res.ok) {
+          const errorText = await res.text();
+          console.error(
+            `[gemini-chat] ${model} error ${res.status}:`,
+            errorText,
+          );
+          continue;
+        }
 
+        const data = await res.json();
+        const rawText: string = data?.choices?.[0]?.message?.content ?? "";
+
+        if (!rawText) {
+          console.warn(
+            `[gemini-chat] ${model} returned empty content, trying next...`,
+          );
+          continue;
+        }
+
+        console.log(`[gemini-chat] Success with model: ${model}`);
+        return NextResponse.json({
+          answer: rawText.trim(),
+          source: "openrouter",
+        });
+      } catch (modelErr) {
+        console.warn(
+          `[gemini-chat] ${model} failed:`,
+          modelErr instanceof Error ? modelErr.message : modelErr,
+        );
+        continue;
+      }
+    }
+
+    // All models exhausted
+    return NextResponse.json({
+      answer:
+        "All AI models are temporarily busy. Please wait a few seconds and try again.",
+      source: "rate_limited",
+    });
+  } catch (err: unknown) {
+    console.error("[gemini-chat] Unexpected error:", err);
+
+    const isTimeout =
+      (err instanceof Error && err.name === "AbortError") ||
+      (err instanceof Error && err.message?.includes("timeout")) ||
+      (err instanceof Error && err.message?.includes("CONNECT_TIMEOUT"));
+
+    if (isTimeout) {
       return NextResponse.json({
         answer:
-          "Sorry, I couldn't reach the AI service right now. Please try again in a moment.",
+          "The AI service is taking too long to respond. This usually means a network issue — try using a VPN or switching to a mobile hotspot, then try again.",
         source: "error",
       });
     }
 
-    const geminiData = await geminiRes.json();
-    const rawText: string =
-      geminiData?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
-
-    if (!rawText) {
-      return NextResponse.json({
-        answer:
-          "I wasn't able to generate an answer. Could you rephrase your question?",
-        source: "empty",
-      });
-    }
-
-    return NextResponse.json({
-      answer: rawText.trim(),
-      source: "gemini",
-    });
-  } catch (err) {
-    console.error("[gemini-chat] Unexpected error:", err);
     return NextResponse.json(
       { error: "Failed to process your question. Please try again." },
       { status: 500 },
