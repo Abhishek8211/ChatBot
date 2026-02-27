@@ -23,7 +23,15 @@ interface Rate {
   region: string;
 }
 
-const REGIONS = ["All", "Asia", "Europe", "Americas", "Middle East", "Africa", "Oceania"];
+const REGIONS = [
+  "All",
+  "Asia",
+  "Europe",
+  "Americas",
+  "Middle East",
+  "Africa",
+  "Oceania",
+];
 
 const regionColors: Record<string, string> = {
   Asia: "from-amber-500/20 to-orange-500/10 border-amber-500/20",
@@ -61,7 +69,10 @@ export default function RatesPage() {
       .catch(() => setLoading(false));
   }, []);
 
-  const maxUsd = useMemo(() => Math.max(...rates.map((r) => r.usd_per_kwh), 0.01), [rates]);
+  const maxUsd = useMemo(
+    () => Math.max(...rates.map((r) => r.usd_per_kwh), 0.01),
+    [rates],
+  );
 
   const filtered = useMemo(() => {
     let list = rates;
@@ -76,9 +87,27 @@ export default function RatesPage() {
   }, [rates, region, search, sortAsc]);
 
   // Stats
-  const cheapest = useMemo(() => (filtered.length ? filtered.reduce((a, b) => (a.usd_per_kwh < b.usd_per_kwh ? a : b)) : null), [filtered]);
-  const expensive = useMemo(() => (filtered.length ? filtered.reduce((a, b) => (a.usd_per_kwh > b.usd_per_kwh ? a : b)) : null), [filtered]);
-  const avg = useMemo(() => (filtered.length ? filtered.reduce((s, r) => s + r.usd_per_kwh, 0) / filtered.length : 0), [filtered]);
+  const cheapest = useMemo(
+    () =>
+      filtered.length
+        ? filtered.reduce((a, b) => (a.usd_per_kwh < b.usd_per_kwh ? a : b))
+        : null,
+    [filtered],
+  );
+  const expensive = useMemo(
+    () =>
+      filtered.length
+        ? filtered.reduce((a, b) => (a.usd_per_kwh > b.usd_per_kwh ? a : b))
+        : null,
+    [filtered],
+  );
+  const avg = useMemo(
+    () =>
+      filtered.length
+        ? filtered.reduce((s, r) => s + r.usd_per_kwh, 0) / filtered.length
+        : 0,
+    [filtered],
+  );
 
   if (loading) {
     return (
@@ -151,7 +180,9 @@ export default function RatesPage() {
               <p className="text-sm font-semibold text-primary-400">
                 ${avg.toFixed(4)}/kWh
               </p>
-              <p className="text-xs text-dark-300">{filtered.length} countries</p>
+              <p className="text-xs text-dark-300">
+                {filtered.length} countries
+              </p>
             </div>
           </div>
           <div className="glass rounded-xl p-4 flex items-center gap-4">
@@ -237,7 +268,10 @@ export default function RatesPage() {
               <p>No countries match your search.</p>
             </motion.div>
           ) : (
-            <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <motion.div
+              layout
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"
+            >
               {filtered.map((rate, idx) => {
                 const barWidth = Math.max((rate.usd_per_kwh / maxUsd) * 100, 2);
                 const isHovered = hoveredIdx === idx;
@@ -282,7 +316,9 @@ export default function RatesPage() {
                     {/* Top row: flag + country + region dot */}
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2.5">
-                        <span className="text-2xl leading-none">{rate.flag}</span>
+                        <span className="text-2xl leading-none">
+                          {rate.flag}
+                        </span>
                         <div>
                           <p className="text-sm font-semibold text-dark-50 leading-tight">
                             {rate.country}
@@ -298,7 +334,9 @@ export default function RatesPage() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className={`text-lg font-bold ${priceLevel} leading-tight`}>
+                        <p
+                          className={`text-lg font-bold ${priceLevel} leading-tight`}
+                        >
                           {rate.currency}
                           {rate.rate_per_kwh < 1
                             ? rate.rate_per_kwh.toFixed(3)
