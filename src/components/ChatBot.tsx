@@ -201,6 +201,7 @@ export default function ChatBot({ onCalculationComplete }: ChatBotProps) {
     currency: "₹",
     country: "India",
   });
+  const [loadingRate, setLoadingRate] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [darkMode, setDarkMode] = useState(() => {
     if (typeof window !== "undefined") {
@@ -259,32 +260,38 @@ export default function ChatBot({ onCalculationComplete }: ChatBotProps) {
     }
   }, [messages, isTyping]);
 
-  // Fetch electricity rate on mount
-  useEffect(() => {
-    fetch("/api/electricity-rate?country=india")
-      .then((res) => res.json())
-      .then((data) => {
-        setRateData({
-          rate: data.rate_per_kwh,
-          currency: data.currency,
-          country: data.country,
-        });
-      })
-      .catch(() => {});
+  // Fetch electricity rate for a given country
+  const fetchRate = useCallback(async (country: string) => {
+    setLoadingRate(true);
+    try {
+      const res = await fetch(
+        `/api/electricity-rate?country=${encodeURIComponent(country)}`,
+      );
+      const data = await res.json();
+      setRateData({
+        rate: data.rate_per_kwh,
+        currency: data.currency,
+        country: data.country,
+      });
+      return data;
+    } catch {
+      return null;
+    } finally {
+      setLoadingRate(false);
+    }
   }, []);
 
-  // Send greeting on mount — instant, no artificial delay
-  // Guard prevents duplicate in React Strict Mode (dev double-mount)
+  // Send greeting on mount — ask country first
   const greetingSent = useRef(false);
   useEffect(() => {
     if (greetingSent.current) return;
     greetingSent.current = true;
     addBotMessage(
-      `👋 Hello! I'm <strong>EnergyIQ</strong>, your smart energy assistant.<br/><br/>I'll help you calculate your monthly electricity consumption and cost.<br/><br/>Let's start — <strong>how many electrical devices</strong> do you use at home?`,
+      `👋 Hello! I'm <strong>EnergyIQ</strong>, your smart energy assistant.<br/><br/>I'll help you calculate your monthly electricity consumption and cost.<br/><br/>First, <strong>which country</strong> are you in? This helps me fetch accurate electricity rates. 🌍`,
       undefined,
       true,
     );
-    setStep("ask_device_count");
+    setStep("ask_country");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -319,7 +326,7 @@ export default function ChatBot({ onCalculationComplete }: ChatBotProps) {
           },
         ]);
         playSound("receive");
-      }, 100);
+      }, 50);
     },
     [playSound],
   );
@@ -356,8 +363,137 @@ export default function ChatBot({ onCalculationComplete }: ChatBotProps) {
     processInput(option);
   };
 
+  /** Send a free-form question to the AI (reusable from any step) */
+  const sendToAI = (question: string) => {
+    const previousStep = step;
+    setStep("free_ask");
+    setIsTyping(true);
+    fetch("/api/gemini-chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question }),
+    })
+      .then(async (res) => {
+        const data = await res.json();
+        setIsTyping(false);
+
+        if (!res.ok) {
+          const errMsg =
+            data.error || "Something went wrong. Please try again.";
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: generateId(),
+              role: "bot",
+              content:
+                `⚠️ ${errMsg}<br/><br/>` +
+                `Feel free to ask another question, type <code>reset</code> to calculate again, or <code>tips</code> for energy-saving advice!`,
+              timestamp: new Date(),
+            },
+          ]);
+          playSound("receive");
+          return;
+        }
+
+        const answer = (
+          data.answer || "Sorry, I couldn't get an answer."
+        ).replace(/\n/g, "<br/>");
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: generateId(),
+            role: "bot",
+            content:
+              `🤖 <strong>AI Answer:</strong><br/><br/>${answer}<br/><br/>` +
+              `Feel free to ask another question, type <code>reset</code> to calculate again, or <code>tips</code> for energy-saving advice!`,
+            timestamp: new Date(),
+          },
+        ]);
+        playSound("receive");
+      })
+      .catch((err) => {
+        console.error("AI chat fetch error:", err);
+        setIsTyping(false);
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: generateId(),
+            role: "bot",
+            content:
+              "⚠️ Sorry, I couldn't reach the AI service right now. Please try again in a moment.<br/><br/>" +
+              "Type <code>reset</code> to start a new calculation, or <code>tips</code> for energy-saving advice!",
+            timestamp: new Date(),
+          },
+        ]);
+        playSound("receive");
+      });
+  };
+
   /** Process user input based on current step */
   const processInput = (userInput: string) => {
+    const lower = userInput.trim().toLowerCase();
+
+    // ── Global commands: work from ANY step ──
+
+    // "reset" always resets the calculator
+    if (lower === "reset") {
+      setDevices([]);
+      setCurrentDevice({});
+      setDeviceIndex(0);
+      setTotalDeviceCount(0);
+      setStep("ask_country");
+      addBotMessage(
+        "🔄 Reset! Let's start fresh.<br/><br/>🌍 <strong>Which country</strong> are you in?",
+        undefined,
+        true,
+      );
+      return;
+    }
+
+    // "tips" always shows energy tips
+    if (lower === "tips") {
+      setStep("tips");
+      addBotMessage(
+        `💡 <strong>Energy Saving Tips:</strong><br/><br/>` +
+          `1. 💡 Switch to <strong>LED bulbs</strong> — save up to 75% on lighting.<br/>` +
+          `2. ❄️ Set AC to <strong>24°C</strong> — each degree saves ~6% energy.<br/>` +
+          `3. 🔌 <strong>Unplug idle devices</strong> — phantom loads = 5-10% of bill.<br/>` +
+          `4. 🌀 Use <strong>ceiling fans</strong> instead of AC when possible.<br/>` +
+          `5. ⭐ Buy <strong>5-star rated</strong> appliances — up to 45% less energy.<br/>` +
+          `6. ☀️ Use <strong>natural light</strong> during daytime.<br/>` +
+          `7. 🧺 Run washing machines on <strong>full loads</strong> only.<br/><br/>` +
+          `Type <code>reset</code> to calculate again or ask me any question!`,
+        undefined,
+        true,
+      );
+      return;
+    }
+
+    // "ask <question>" prefix — always routes to AI from any step
+    if (lower.startsWith("ask ") && lower.length > 5) {
+      const question = userInput.trim().slice(4).trim();
+      sendToAI(question);
+      return;
+    }
+
+    // Detect free-form questions during calculator steps
+    // (contains ?, or starts with who/what/why/how/when/where/is/are/can/do/does/tell/explain)
+    const isQuestion =
+      lower.includes("?") ||
+      /^(who|what|why|how|when|where|is|are|can|do|does|tell|explain|describe|define)\b/.test(
+        lower,
+      );
+
+    // If it looks like a question and we're in a calculator step, route to AI
+    if (
+      isQuestion &&
+      step !== "result" &&
+      step !== "tips" &&
+      step !== "free_ask"
+    ) {
+      sendToAI(userInput.trim());
+      return;
+    }
     // Handle undo last device
     if (userInput === "__undo__" && devices.length > 0) {
       const updated = devices.slice(0, -1);
@@ -375,6 +511,39 @@ export default function ChatBot({ onCalculationComplete }: ChatBotProps) {
     }
 
     switch (step) {
+      case "ask_country": {
+        const country = userInput.trim();
+        if (country.length < 2) {
+          addBotMessage("Please enter a valid country name.");
+          return;
+        }
+        addBotMessage(
+          `🌍 <strong>${country}</strong> — fetching live electricity rates...`,
+          undefined,
+          true,
+        );
+        fetchRate(country).then((data) => {
+          if (data) {
+            addBotMessage(
+              `✅ Got it! Electricity rate for <strong>${data.country}</strong>:<br/>` +
+                `⚡ <strong>${data.currency}${data.rate_per_kwh}/kWh</strong> (${data.source === "api-ninjas" ? "live rate" : "estimated rate"})<br/><br/>` +
+                `Now, <strong>how many electrical devices</strong> do you use at home?`,
+              undefined,
+              true,
+            );
+          } else {
+            addBotMessage(
+              `⚠️ Couldn't fetch rates for that country. Using default rate: <strong>${rateData.currency}${rateData.rate}/kWh</strong> (${rateData.country}).<br/><br/>` +
+                `<strong>How many electrical devices</strong> do you use at home?`,
+              undefined,
+              true,
+            );
+          }
+          setStep("ask_device_count");
+        });
+        break;
+      }
+
       case "ask_device_count": {
         const count = parseInt(userInput);
         if (isNaN(count) || count < 1 || count > 50) {
@@ -520,38 +689,38 @@ export default function ChatBot({ onCalculationComplete }: ChatBotProps) {
               `All <strong>${totalDeviceCount} devices</strong> added! Let me calculate your energy consumption... 🔄`,
           );
 
-          // Run calculation after a delay
-          setTimeout(() => {
-            const result = calculateAllDevices(
-              newDevices,
-              rateData.rate,
-              rateData.currency,
-              rateData.country,
-            );
-            saveToHistory(result);
-            onCalculationComplete(result);
+          // Run calculation instantly
+          const result = calculateAllDevices(
+            newDevices,
+            rateData.rate,
+            rateData.currency,
+            rateData.country,
+          );
+          saveToHistory(result);
+          onCalculationComplete(result);
 
-            setStep("result");
-            const breakdown = result.devices
-              .map(
-                (d) =>
-                  `${DEVICE_ICONS[d.device.type]} <strong>${d.device.type}</strong> (x${d.device.quantity}): ${d.monthlyKwh} kWh — ${rateData.currency}${d.monthlyCost} (${d.percentage}%)`,
-              )
-              .join("<br/>");
+          setStep("result");
+          const breakdown = result.devices
+            .map(
+              (d) =>
+                `${DEVICE_ICONS[d.device.type]} <strong>${d.device.type}</strong> (x${d.device.quantity}): ${d.monthlyKwh} kWh — ${rateData.currency}${d.monthlyCost} (${d.percentage}%)`,
+            )
+            .join("<br/>");
 
-            addBotMessage(
-              `📊 <strong>Calculation Complete!</strong><br/><br/>` +
-                `<strong>Device Breakdown:</strong><br/>${breakdown}<br/><br/>` +
-                `━━━━━━━━━━━━━━━━━━<br/>` +
-                `⚡ <strong>Daily Usage:</strong> ${result.totalDailyKwh} kWh<br/>` +
-                `📅 <strong>Monthly Usage:</strong> ${result.totalMonthlyKwh} kWh<br/>` +
-                `💰 <strong>Estimated Monthly Cost:</strong> <span style="color:#20c997;font-size:1.1em;font-weight:700">${rateData.currency}${result.totalMonthlyCost}</span><br/>` +
-                `🌍 Rate: ${rateData.currency}${rateData.rate}/kWh (${rateData.country})<br/><br/>` +
-                `Check the <strong>Charts</strong> section below for visual breakdown! 📈<br/>` +
-                `You can also download a <strong>PDF report</strong> or view your <strong>History</strong>.<br/><br/>` +
-                `Type <code>reset</code> to calculate again, <code>tips</code> for energy-saving advice, or <strong>ask me any electricity question</strong>! 💡`,
-            );
-          }, 1500);
+          addBotMessage(
+            `📊 <strong>Calculation Complete!</strong><br/><br/>` +
+              `<strong>Device Breakdown:</strong><br/>${breakdown}<br/><br/>` +
+              `━━━━━━━━━━━━━━━━━━<br/>` +
+              `⚡ <strong>Daily Usage:</strong> ${result.totalDailyKwh} kWh<br/>` +
+              `📅 <strong>Monthly Usage:</strong> ${result.totalMonthlyKwh} kWh<br/>` +
+              `💰 <strong>Estimated Monthly Cost:</strong> <span style="color:#20c997;font-size:1.1em;font-weight:700">${rateData.currency}${result.totalMonthlyCost}</span><br/>` +
+              `🌍 Rate: ${rateData.currency}${rateData.rate}/kWh (${rateData.country})<br/><br/>` +
+              `Check the <strong>Charts</strong> section below for visual breakdown! 📈<br/>` +
+              `You can also download a <strong>PDF report</strong>.<br/><br/>` +
+              `Type <code>reset</code> to calculate again, <code>tips</code> for energy-saving advice, or <strong>ask me any electricity question</strong>! 💡`,
+            undefined,
+            true,
+          );
         }
         break;
       }
@@ -559,97 +728,8 @@ export default function ChatBot({ onCalculationComplete }: ChatBotProps) {
       case "result":
       case "tips":
       case "free_ask": {
-        if (userInput.toLowerCase() === "reset") {
-          setDevices([]);
-          setCurrentDevice({});
-          setDeviceIndex(0);
-          setTotalDeviceCount(0);
-          setStep("ask_device_count");
-          addBotMessage(
-            "🔄 Reset! Let's start fresh.<br/><br/>How many electrical devices do you use at home?",
-            undefined,
-            true,
-          );
-        } else if (userInput.toLowerCase() === "tips") {
-          setStep("tips");
-          addBotMessage(
-            `💡 <strong>Energy Saving Tips:</strong><br/><br/>` +
-              `1. 💡 Switch to <strong>LED bulbs</strong> — save up to 75% on lighting.<br/>` +
-              `2. ❄️ Set AC to <strong>24°C</strong> — each degree saves ~6% energy.<br/>` +
-              `3. 🔌 <strong>Unplug idle devices</strong> — phantom loads = 5-10% of bill.<br/>` +
-              `4. 🌀 Use <strong>ceiling fans</strong> instead of AC when possible.<br/>` +
-              `5. ⭐ Buy <strong>5-star rated</strong> appliances — up to 45% less energy.<br/>` +
-              `6. ☀️ Use <strong>natural light</strong> during daytime.<br/>` +
-              `7. 🧺 Run washing machines on <strong>full loads</strong> only.<br/><br/>` +
-              `Type <code>reset</code> to calculate again or ask me any electricity question!`,
-            undefined,
-            true,
-          );
-        } else {
-          // Free-form electricity question → send to Gemini
-          setStep("free_ask");
-          setIsTyping(true);
-          fetch("/api/gemini-chat", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ question: userInput }),
-          })
-            .then(async (res) => {
-              const data = await res.json();
-              setIsTyping(false);
-
-              if (!res.ok) {
-                // API returned an error status
-                const errMsg = data.error || "Something went wrong. Please try again.";
-                setMessages((prev) => [
-                  ...prev,
-                  {
-                    id: generateId(),
-                    role: "bot",
-                    content:
-                      `⚠️ ${errMsg}<br/><br/>` +
-                      `Feel free to ask another question, type <code>reset</code> to calculate again, or <code>tips</code> for energy-saving advice!`,
-                    timestamp: new Date(),
-                  },
-                ]);
-                playSound("receive");
-                return;
-              }
-
-              const answer = (
-                data.answer ||
-                "Sorry, I couldn't get an answer."
-              ).replace(/\n/g, "<br/>");
-              setMessages((prev) => [
-                ...prev,
-                {
-                  id: generateId(),
-                  role: "bot",
-                  content:
-                    `🤖 <strong>AI Answer:</strong><br/><br/>${answer}<br/><br/>` +
-                    `Feel free to ask another question, type <code>reset</code> to calculate again, or <code>tips</code> for energy-saving advice!`,
-                  timestamp: new Date(),
-                },
-              ]);
-              playSound("receive");
-            })
-            .catch((err) => {
-              console.error("Gemini chat fetch error:", err);
-              setIsTyping(false);
-              setMessages((prev) => [
-                ...prev,
-                {
-                  id: generateId(),
-                  role: "bot",
-                  content:
-                    "⚠️ Sorry, I couldn't reach the AI service right now. Please try again in a moment.<br/><br/>" +
-                    "Type <code>reset</code> to start a new calculation, or <code>tips</code> for energy-saving advice!",
-                  timestamp: new Date(),
-                },
-              ]);
-              playSound("receive");
-            });
-        }
+        // reset and tips are handled globally above — any other text is a question
+        sendToAI(userInput);
         break;
       }
 
@@ -661,6 +741,17 @@ export default function ChatBot({ onCalculationComplete }: ChatBotProps) {
   /** Build quick-action buttons based on current step */
   const getQuickButtons = (): { label: string; value: string }[] => {
     switch (step) {
+      case "ask_country":
+        return [
+          { label: "🇮🇳 India", value: "India" },
+          { label: "🇺🇸 USA", value: "United States" },
+          { label: "🇬🇧 UK", value: "United Kingdom" },
+          { label: "🇩🇪 Germany", value: "Germany" },
+          { label: "🇦🇺 Australia", value: "Australia" },
+          { label: "🇨🇦 Canada", value: "Canada" },
+          { label: "🇯🇵 Japan", value: "Japan" },
+          { label: "🇧🇷 Brazil", value: "Brazil" },
+        ];
       case "ask_device_count":
         return [
           { label: "1️⃣ 1", value: "1" },
