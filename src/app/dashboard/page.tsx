@@ -9,7 +9,7 @@ import { motion } from "framer-motion";
 import CountUp from "react-countup";
 import Link from "next/link";
 import { CalculationResult } from "@/utils/types";
-import { getHistory, formatCurrency, formatKwh } from "@/utils/helpers";
+import { getHistory } from "@/utils/helpers";
 import { ENERGY_TIPS } from "@/utils/constants";
 import TipsModal from "@/components/TipsModal";
 import {
