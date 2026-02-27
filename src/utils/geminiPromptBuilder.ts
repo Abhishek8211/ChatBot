@@ -34,7 +34,7 @@ export interface GeminiTipsResponse {
   tips: GeminiTip[];
   estimated_savings: string;
   generated_at: string;
-  source: "gemini" | "fallback";
+  source: "gemini" | "openrouter" | "fallback";
 }
 
 /**
@@ -45,7 +45,7 @@ export function buildGeminiPrompt(data: GeminiTipsRequest): string {
   const deviceList = data.devices
     .map(
       (d, i) =>
-        `${i + 1}. ${d.name} — ${d.watts}W × ${d.hours}h/day → ${d.monthly_kwh} kWh/mo (${data.currency}${d.monthly_cost}/mo)`
+        `${i + 1}. ${d.name} — ${d.watts}W × ${d.hours}h/day → ${d.monthly_kwh} kWh/mo (${data.currency}${d.monthly_cost}/mo)`,
     )
     .join("\n");
 
@@ -93,7 +93,9 @@ export function getFallbackTips(data: GeminiTipsRequest): GeminiTipsResponse {
   const tips: GeminiTip[] = [];
 
   // Sort devices by cost descending
-  const sorted = [...data.devices].sort((a, b) => b.monthly_cost - a.monthly_cost);
+  const sorted = [...data.devices].sort(
+    (a, b) => b.monthly_cost - a.monthly_cost,
+  );
 
   // Top consumer tip
   if (sorted.length > 0) {
@@ -122,19 +124,22 @@ export function getFallbackTips(data: GeminiTipsRequest): GeminiTipsResponse {
     {
       icon: "💡",
       title: "Switch to LED Bulbs",
-      description: "LED bulbs use 75% less energy than incandescent and last 25x longer. Switch all bulbs for immediate savings.",
+      description:
+        "LED bulbs use 75% less energy than incandescent and last 25x longer. Switch all bulbs for immediate savings.",
       savings: `${data.currency}${Math.round(data.monthly_cost * 0.05)}/mo`,
     },
     {
       icon: "🔌",
       title: "Eliminate Phantom Loads",
-      description: "Unplug chargers and devices when not in use. Phantom loads account for 5-10% of your electricity bill.",
+      description:
+        "Unplug chargers and devices when not in use. Phantom loads account for 5-10% of your electricity bill.",
       savings: `${data.currency}${Math.round(data.monthly_cost * 0.07)}/mo`,
     },
     {
       icon: "⭐",
       title: "Upgrade to 5-Star Appliances",
-      description: "5-star rated appliances consume up to 45% less energy. Prioritize replacing your highest-consuming devices.",
+      description:
+        "5-star rated appliances consume up to 45% less energy. Prioritize replacing your highest-consuming devices.",
       savings: `${data.currency}${Math.round(data.monthly_cost * 0.15)}/mo`,
     },
     {
@@ -142,7 +147,7 @@ export function getFallbackTips(data: GeminiTipsRequest): GeminiTipsResponse {
       title: "Monitor & Schedule Usage",
       description: `Track consumption patterns and shift heavy usage to off-peak hours. Smart plugs can automate this.`,
       savings: `${data.currency}${Math.round(data.monthly_cost * 0.08)}/mo`,
-    }
+    },
   );
 
   return {
