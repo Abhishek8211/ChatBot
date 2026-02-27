@@ -201,7 +201,7 @@ export default function ChatBot({ onCalculationComplete }: ChatBotProps) {
     currency: "₹",
     country: "India",
   });
-  const [loadingRate, setLoadingRate] = useState(false);
+  const [_loadingRate, setLoadingRate] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [darkMode, setDarkMode] = useState(() => {
     if (typeof window !== "undefined") {
@@ -365,7 +365,6 @@ export default function ChatBot({ onCalculationComplete }: ChatBotProps) {
 
   /** Send a free-form question to the AI (reusable from any step) */
   const sendToAI = (question: string) => {
-    const previousStep = step;
     setStep("free_ask");
     setIsTyping(true);
     fetch("/api/gemini-chat", {
