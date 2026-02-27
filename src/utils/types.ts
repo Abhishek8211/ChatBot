@@ -72,6 +72,7 @@ export interface ChatMessage {
 /** Chatbot conversation state */
 export type ChatStep =
   | "greeting"
+  | "ask_country"
   | "ask_device_count"
   | "ask_device_type"
   | "ask_quantity"
