@@ -32,8 +32,8 @@ export interface UseGeminiTipsReturn {
   estimatedSavings: string;
   /** ISO timestamp of generation */
   generatedAt: string;
-  /** Whether tips came from Gemini or fallback */
-  source: "gemini" | "fallback" | null;
+  /** Whether tips came from Gemini, OpenRouter, or fallback */
+  source: "gemini" | "openrouter" | "fallback" | null;
   /** Loading state */
   isLoading: boolean;
   /** Error message if failed */
@@ -95,7 +95,9 @@ export function useGeminiTips(): UseGeminiTipsReturn {
   const [tips, setTips] = useState<GeminiTip[]>([]);
   const [estimatedSavings, setEstimatedSavings] = useState("");
   const [generatedAt, setGeneratedAt] = useState("");
-  const [source, setSource] = useState<"gemini" | "fallback" | null>(null);
+  const [source, setSource] = useState<
+    "gemini" | "openrouter" | "fallback" | null
+  >(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -107,70 +109,76 @@ export function useGeminiTips(): UseGeminiTipsReturn {
   /**
    * Core fetch function
    */
-  const doFetch = useCallback(async (result: CalculationResult, skipCache: boolean) => {
-    // Debounce guard
-    const now = Date.now();
-    if (now - lastCallRef.current < DEBOUNCE_MS) {
-      return;
-    }
-    // Prevent duplicate in-flight requests
-    if (inFlightRef.current) return;
-
-    // Check cache first (unless regenerating)
-    if (!skipCache) {
-      const cached = loadCachedTips();
-      if (cached && cached.tips.length > 0) {
-        setTips(cached.tips);
-        setEstimatedSavings(cached.estimated_savings);
-        setGeneratedAt(cached.generated_at);
-        setSource(cached.source);
+  const doFetch = useCallback(
+    async (result: CalculationResult, skipCache: boolean) => {
+      // Debounce guard
+      const now = Date.now();
+      if (now - lastCallRef.current < DEBOUNCE_MS) {
         return;
       }
-    }
+      // Prevent duplicate in-flight requests
+      if (inFlightRef.current) return;
 
-    lastCallRef.current = now;
-    inFlightRef.current = true;
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const requestBody = buildRequestFromResult(result);
-
-      const res = await fetch("/api/gemini-tips", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody),
-      });
-
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({ error: "Unknown error" }));
-        throw new Error(errData.error || `HTTP ${res.status}`);
+      // Check cache first (unless regenerating)
+      if (!skipCache) {
+        const cached = loadCachedTips();
+        if (cached && cached.tips.length > 0) {
+          setTips(cached.tips);
+          setEstimatedSavings(cached.estimated_savings);
+          setGeneratedAt(cached.generated_at);
+          setSource(cached.source);
+          return;
+        }
       }
 
-      const data: GeminiTipsResponse = await res.json();
+      lastCallRef.current = now;
+      inFlightRef.current = true;
+      setIsLoading(true);
+      setError(null);
 
-      setTips(data.tips);
-      setEstimatedSavings(data.estimated_savings);
-      setGeneratedAt(data.generated_at);
-      setSource(data.source);
+      try {
+        const requestBody = buildRequestFromResult(result);
 
-      // Cache result
-      saveTipsToCache(data);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to load tips";
-      setError(message);
-      console.error("[useGeminiTips]", message);
-    } finally {
-      setIsLoading(false);
-      inFlightRef.current = false;
-    }
-  }, []);
+        const res = await fetch("/api/gemini-tips", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(requestBody),
+        });
+
+        if (!res.ok) {
+          const errData = await res
+            .json()
+            .catch(() => ({ error: "Unknown error" }));
+          throw new Error(errData.error || `HTTP ${res.status}`);
+        }
+
+        const data: GeminiTipsResponse = await res.json();
+
+        setTips(data.tips);
+        setEstimatedSavings(data.estimated_savings);
+        setGeneratedAt(data.generated_at);
+        setSource(data.source);
+
+        // Cache result
+        saveTipsToCache(data);
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : "Failed to load tips";
+        setError(message);
+        console.error("[useGeminiTips]", message);
+      } finally {
+        setIsLoading(false);
+        inFlightRef.current = false;
+      }
+    },
+    [],
+  );
 
   const fetchTips = useCallback(
     async (result: CalculationResult) => {
       await doFetch(result, false);
     },
-    [doFetch]
+    [doFetch],
   );
 
   const regenerate = useCallback(
@@ -185,7 +193,7 @@ export function useGeminiTips(): UseGeminiTipsReturn {
       setSource(null);
       await doFetch(result, true);
     },
-    [doFetch]
+    [doFetch],
   );
 
   const clear = useCallback(() => {
