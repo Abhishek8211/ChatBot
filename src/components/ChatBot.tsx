@@ -201,6 +201,7 @@ export default function ChatBot({ onCalculationComplete }: ChatBotProps) {
     currency: "₹",
     country: "India",
   });
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_loadingRate, setLoadingRate] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [darkMode, setDarkMode] = useState(() => {
