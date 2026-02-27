@@ -13,6 +13,7 @@ import {
   HiOutlineClock,
   HiOutlineXMark,
   HiOutlineLightBulb,
+  HiOutlineGlobeAlt,
 } from "react-icons/hi2";
 import { HiOutlineLightningBolt } from "react-icons/hi";
 
@@ -25,6 +26,7 @@ const navItems = [
   { label: "Home", href: "/", icon: HiOutlineHome },
   { label: "Dashboard", href: "/dashboard", icon: HiOutlineLightningBolt },
   { label: "Calculator", href: "/calculator", icon: HiOutlineCalculator },
+  { label: "Live Rates", href: "/rates", icon: HiOutlineGlobeAlt },
   { label: "History", href: "/history", icon: HiOutlineClock },
 ];
 
