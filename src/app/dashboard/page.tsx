@@ -18,14 +18,14 @@ import {
   HiOutlineCalendar,
   HiOutlineChartBar,
 } from "react-icons/hi";
-import { HiOutlineCalculator, HiOutlineLightBulb, HiOutlineSparkles } from "react-icons/hi2";
+import {
+  HiOutlineCalculator,
+  HiOutlineLightBulb,
+  HiOutlineSparkles,
+} from "react-icons/hi2";
 
-const EnergyPieChart = lazy(
-  () => import("@/components/charts/EnergyPieChart")
-);
-const EnergyBarChart = lazy(
-  () => import("@/components/charts/EnergyBarChart")
-);
+const EnergyPieChart = lazy(() => import("@/components/charts/EnergyPieChart"));
+const EnergyBarChart = lazy(() => import("@/components/charts/EnergyBarChart"));
 
 function ChartSkeleton() {
   return (
@@ -39,7 +39,7 @@ function ChartSkeleton() {
 export default function DashboardPage() {
   const [history, setHistory] = useState<CalculationResult[]>([]);
   const [latestResult, setLatestResult] = useState<CalculationResult | null>(
-    null
+    null,
   );
   const [isTipsOpen, setIsTipsOpen] = useState(false);
 
@@ -49,16 +49,14 @@ export default function DashboardPage() {
     if (h.length > 0) setLatestResult(h[0]);
   }, []);
 
-  // Aggregate stats
   const totalCalculations = history.length;
   const totalDevicesAnalyzed = history.reduce(
     (sum, h) => sum + h.devices.length,
-    0
+    0,
   );
   const avgMonthlyCost =
     history.length > 0
-      ? history.reduce((sum, h) => sum + h.totalMonthlyCost, 0) /
-        history.length
+      ? history.reduce((sum, h) => sum + h.totalMonthlyCost, 0) / history.length
       : 0;
 
   const randomTips = ENERGY_TIPS.slice(0, 3);
@@ -131,9 +129,7 @@ export default function DashboardPage() {
               </div>
               <p className="text-xs text-dark-200 mb-1">{stat.label}</p>
               <p className="text-2xl font-bold text-dark-50">
-                {stat.prefix && (
-                  <span className="text-sm">{stat.prefix}</span>
-                )}
+                {stat.prefix && <span className="text-sm">{stat.prefix}</span>}
                 <CountUp
                   end={stat.value}
                   decimals={stat.decimals || 0}
@@ -254,62 +250,6 @@ export default function DashboardPage() {
           onClose={() => setIsTipsOpen(false)}
           result={latestResult}
         />
-      )}
-
-      {/* Recent history preview */}
-      {history.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7 }}
-          className="glass rounded-2xl p-6"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-dark-50">
-              📋 Recent Calculations
-            </h2>
-            <Link
-              href="/history"
-              className="text-xs text-primary-400 hover:text-primary-300 transition-colors"
-            >
-              View all →
-            </Link>
-          </div>
-          <div className="space-y-3">
-            {history.slice(0, 3).map((h, idx) => (
-              <motion.div
-                key={h.id}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.8 + idx * 0.1 }}
-                className="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors"
-              >
-                <div>
-                  <p className="text-sm text-dark-50 font-medium">
-                    {h.devices.length} device{h.devices.length > 1 ? "s" : ""} —{" "}
-                    {h.devices.map((d) => d.device.type).join(", ")}
-                  </p>
-                  <p className="text-xs text-dark-300">
-                    {new Date(h.timestamp).toLocaleDateString("en-IN", {
-                      month: "short",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-semibold gradient-text">
-                    {formatCurrency(h.totalMonthlyCost, h.currency)}
-                  </p>
-                  <p className="text-xs text-dark-300">
-                    {formatKwh(h.totalMonthlyKwh)}
-                  </p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
       )}
     </div>
   );
