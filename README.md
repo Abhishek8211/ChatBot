@@ -4,14 +4,14 @@
 
 ### 🏠 Calculate, Analyze & Reduce Your Electricity Costs
 
-[![Next.js](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-14.2-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![OpenRouter AI](https://img.shields.io/badge/OpenRouter-AI-8E75B2?style=for-the-badge&logo=openai&logoColor=white)](https://openrouter.ai/)
-[![Framer Motion](https://img.shields.io/badge/Framer_Motion-12-FF0055?style=for-the-badge&logo=framer&logoColor=white)](https://www.framer.com/motion/)
+[![Framer Motion](https://img.shields.io/badge/Framer_Motion-12.34-FF0055?style=for-the-badge&logo=framer&logoColor=white)](https://www.framer.com/motion/)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
-**Chat with our AI to calculate your home electricity consumption, explore live rates across 50+ countries, get AI-powered saving tips via OpenRouter (8-model fallback chain), and download detailed PDF reports — all through a stunning conversational interface.**
+**Chat with our AI to calculate your home electricity consumption, explore live rates across 60+ countries, get AI-powered saving tips via OpenRouter (8-model fallback chain), and download detailed PDF reports — all through a stunning conversational interface.**
 
 [🚀 Live Demo](#) · [📖 Features](#-features) · [🛠️ Setup](#-getting-started) · [📸 Screenshots](#️-preview)
 
@@ -39,7 +39,7 @@
 | ---------------------------- | ------------------------------------------------------------------------------------------------------------------- |
 | 🤖 **AI Chatbot Calculator** | Step-by-step conversational flow to input devices and calculate energy costs                                        |
 | 🧠 **AI-Powered Tips**       | Personalized energy-saving recommendations via OpenRouter (8-model fallback chain) with rule-based offline fallback |
-| 🌍 **50+ Country Rates**     | Electricity rates across 6 regions with local currency + USD conversion                                             |
+| 🌍 **60+ Countries**         | Electricity rates across 6 regions with local currency + USD conversion                                             |
 | 📊 **Smart Dashboard**       | Visual breakdown with pie charts, bar charts & cost analysis                                                        |
 | 📜 **Calculation History**   | All calculations saved in localStorage with full detail (max 50 entries)                                            |
 | 📥 **PDF Reports**           | Download detailed energy reports with device breakdowns and tips                                                    |
@@ -97,19 +97,19 @@
 ## 🛠️ Tech Stack
 
 ```
-Frontend     →  Next.js 14.2 (App Router) · React 18 · TypeScript 5
+Frontend     →  Next.js 14.2.35 (App Router) · React 18 · TypeScript 5
 Styling      →  Tailwind CSS 3.4 · Glassmorphism dark/light theme
 AI Engine    →  OpenRouter API (8-model fallback chain) + rule-based fallback
 Models       →  Gemma 3 27B · Gemma 3n E4B · Gemma 3 12B · DeepSeek R1
                Nemotron Nano 9B · LLaMA 3.3 70B · Qwen3 4B · Mistral Small 3.1
-Animations   →  Framer Motion 12
-Charts       →  Recharts 3 (lazy loaded with Suspense)
-PDF Export   →  jsPDF 4 + jspdf-autotable 5 + html2canvas
-Confetti     →  canvas-confetti
-Notifications→  react-hot-toast
-Icons        →  react-icons (hi, hi2)
-Counters     →  react-countup (with scroll-spy)
-HTTP         →  Axios
+Animations   →  Framer Motion 12.34
+Charts       →  Recharts 3.7 (lazy loaded with Suspense)
+PDF Export   →  jsPDF 4.1 + jspdf-autotable 5 + html2canvas 1.4
+Confetti     →  canvas-confetti 1.9
+Notifications→  react-hot-toast 2.6
+Icons        →  react-icons 5.5 (hi, hi2)
+Counters     →  react-countup 6.5 (with scroll-spy)
+HTTP         →  Axios 1.13
 Fonts        →  Geist Sans + Geist Mono (local)
 Dev Server   →  Turbopack (instant HMR)
 ```
@@ -126,9 +126,9 @@ energy-calculator/
 │   │   │   ├── ai-suggestions/
 │   │   │   │   └── route.ts               # POST — Rule-based energy suggestions
 │   │   │   ├── electricity-rate/
-│   │   │   │   ├── route.ts               # GET  — Single country rate (53 countries)
+│   │   │   │   ├── route.ts               # GET  — Single country rate (60+ entries, aliases supported)
 │   │   │   │   └── all/
-│   │   │   │       └── route.ts           # GET  — All 47 country rates + USD
+│   │   │   │       └── route.ts           # GET  — All 53 country rates + USD
 │   │   │   ├── energy-tips/
 │   │   │   │   └── route.ts               # GET  — Random energy-saving tips
 │   │   │   ├── gemini-chat/
@@ -177,7 +177,7 @@ energy-calculator/
 
 ---
 
-## 🌍 Supported Countries (53)
+## 🌍 Supported Countries (60)
 
 > Rates in local currency with USD equivalent, organized by region
 
@@ -185,12 +185,12 @@ energy-calculator/
 | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 🌏 **Asia** (14)       | 🇮🇳 India · 🇯🇵 Japan · 🇨🇳 China · 🇰🇷 South Korea · 🇸🇬 Singapore · 🇮🇩 Indonesia · 🇲🇾 Malaysia · 🇹🇭 Thailand · 🇻🇳 Vietnam · 🇵🇭 Philippines · 🇵🇰 Pakistan · 🇧🇩 Bangladesh · 🇱🇰 Sri Lanka · 🇳🇵 Nepal                                                                                                          |
 | 🏜️ **Middle East** (7) | 🇦🇪 UAE · 🇸🇦 Saudi Arabia · 🇶🇦 Qatar · 🇰🇼 Kuwait · 🇮🇷 Iran · 🇮🇶 Iraq · 🇮🇱 Israel                                                                                                                                                                                                                          |
-| 🏰 **Europe** (22)     | 🇬🇧 UK · 🇩🇪 Germany · 🇫🇷 France · 🇮🇹 Italy · 🇪🇸 Spain · 🇳🇱 Netherlands · 🇧🇪 Belgium · 🇸🇪 Sweden · 🇳🇴 Norway · 🇩🇰 Denmark · 🇫🇮 Finland · 🇨🇭 Switzerland · 🇦🇹 Austria · 🇵🇹 Portugal · 🇮🇪 Ireland · 🇵🇱 Poland · 🇬🇷 Greece · 🇹🇷 Turkey · 🇨🇿 Czech Republic · 🇭🇺 Hungary · 🇷🇴 Romania · 🇷🇺 Russia · 🇺🇦 Ukraine |
+| 🏰 **Europe** (23)     | 🇬🇧 UK · 🇩🇪 Germany · 🇫🇷 France · 🇮🇹 Italy · 🇪🇸 Spain · 🇳🇱 Netherlands · 🇧🇪 Belgium · 🇸🇪 Sweden · 🇳🇴 Norway · 🇩🇰 Denmark · 🇫🇮 Finland · 🇨🇭 Switzerland · 🇦🇹 Austria · 🇵🇹 Portugal · 🇮🇪 Ireland · 🇵🇱 Poland · 🇬🇷 Greece · 🇹🇷 Turkey · 🇨🇿 Czech Republic · 🇭🇺 Hungary · 🇷🇴 Romania · 🇷🇺 Russia · 🇺🇦 Ukraine |
 | 🌎 **Americas** (8)    | 🇺🇸 USA · 🇨🇦 Canada · 🇲🇽 Mexico · 🇧🇷 Brazil · 🇦🇷 Argentina · 🇨🇴 Colombia · 🇨🇱 Chile · 🇵🇪 Peru                                                                                                                                                                                                             |
 | 🌍 **Africa** (6)      | 🇿🇦 South Africa · 🇳🇬 Nigeria · 🇪🇬 Egypt · 🇰🇪 Kenya · 🇬🇭 Ghana · 🇪🇹 Ethiopia                                                                                                                                                                                                                              |
 | 🏝️ **Oceania** (2)     | 🇦🇺 Australia · 🇳🇿 New Zealand                                                                                                                                                                                                                                                                            |
 
-> **Note:** All 53 countries are available via the single-rate endpoint. The bulk `/all` endpoint returns 47 countries with USD equivalents, flags, and regions.
+> **Note:** All 60 unique countries listed above are accessible via the single-rate endpoint (which also includes country aliases like `usa`, `uk`, `uae`, `czech`). The bulk `/all` endpoint returns a curated set of **53 countries** with USD equivalents, flags, and regions (excludes Iran, Iraq, Czech Republic, Hungary, Romania, Russia & Ukraine).
 
 ---
 
@@ -216,19 +216,19 @@ Returns the electricity rate for a single country in local currency. Supports al
   "country": "India",
   "rate_per_kwh": 8,
   "currency": "₹",
-  "last_updated": "2026-02-21T...",
+  "last_updated": "2026-03-01T...",
   "source": "database"
 }
 ```
 
 ### `GET /api/electricity-rate/all`
 
-Returns 47 country rates with computed USD equivalents, flags, and regions.
+Returns 53 country rates with computed USD equivalents, flags, and regions.
 
 ```json
 {
-  "count": 47,
-  "last_updated": "2026-02-21T...",
+  "count": 53,
+  "last_updated": "2026-03-01T...",
   "rates": [
     {
       "country": "India",
