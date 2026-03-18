@@ -136,6 +136,9 @@ export function useCustomCursor(): CursorState {
     };
 
     // ---- rAF loop for smooth trailing ----
+    // Keep refs to the last-rendered values so we only call setState when something changed
+    const lastRendered = { x: -100, y: -100, trailX: -100, trailY: -100, variant: "default" as typeof variant.current, isVisible: false };
+
     const tick = () => {
       const factor = reducedMotion ? 1 : LERP_FACTOR;
 
@@ -144,16 +147,41 @@ export function useCustomCursor(): CursorState {
         y: lerp(trailPos.current.y, mousePos.current.y, factor),
       };
 
-      setState({
-        x: mousePos.current.x,
-        y: mousePos.current.y,
-        trailX: trailPos.current.x,
-        trailY: trailPos.current.y,
-        variant: variant.current,
-        isActive: true,
-        prefersReducedMotion: reducedMotion,
-        isVisible: isVisible.current,
-      });
+      const nx = mousePos.current.x;
+      const ny = mousePos.current.y;
+      // Round trail to 1 decimal to avoid floating-point churn
+      const ntx = Math.round(trailPos.current.x * 10) / 10;
+      const nty = Math.round(trailPos.current.y * 10) / 10;
+      const nv = variant.current;
+      const nvis = isVisible.current;
+
+      // Only re-render when something actually changed
+      if (
+        nx !== lastRendered.x ||
+        ny !== lastRendered.y ||
+        ntx !== lastRendered.trailX ||
+        nty !== lastRendered.trailY ||
+        nv !== lastRendered.variant ||
+        nvis !== lastRendered.isVisible
+      ) {
+        lastRendered.x = nx;
+        lastRendered.y = ny;
+        lastRendered.trailX = ntx;
+        lastRendered.trailY = nty;
+        lastRendered.variant = nv;
+        lastRendered.isVisible = nvis;
+
+        setState({
+          x: nx,
+          y: ny,
+          trailX: ntx,
+          trailY: nty,
+          variant: nv,
+          isActive: true,
+          prefersReducedMotion: reducedMotion,
+          isVisible: nvis,
+        });
+      }
 
       rafId.current = requestAnimationFrame(tick);
     };
