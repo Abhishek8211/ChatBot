@@ -9,6 +9,7 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![OpenRouter AI](https://img.shields.io/badge/OpenRouter-AI-8E75B2?style=for-the-badge&logo=openai&logoColor=white)](https://openrouter.ai/)
 [![Framer Motion](https://img.shields.io/badge/Framer_Motion-12.34-FF0055?style=for-the-badge&logo=framer&logoColor=white)](https://www.framer.com/motion/)
+[![Performance](https://img.shields.io/badge/Optimized-Performance-20c997?style=for-the-badge&logo=lighthouse&logoColor=white)](#-performance)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
 **Chat with our AI to calculate your home electricity consumption, explore live rates across 60+ countries, get AI-powered saving tips via OpenRouter (8-model fallback chain), and download detailed PDF reports — all through a stunning conversational interface.**
@@ -78,6 +79,7 @@
 | 🎞️ **Framer Motion**          | Smooth page transitions, chat animations, chart reveals with spring physics                                     |
 | 📱 **Fully Responsive**       | Works beautifully on desktop, tablet & mobile with slide-in sidebar                                             |
 | 🎯 **First-Paint Fix**        | CSS animation trick prevents Framer Motion blank flash on initial load                                          |
+| 🌐 **Open Graph Tags**        | Full OG metadata + theme-color for rich link previews and mobile PWA                                           |
 
 ### 🧩 AI Tips Modal
 
@@ -103,15 +105,16 @@ AI Engine    →  OpenRouter API (8-model fallback chain) + rule-based fallback
 Models       →  Gemma 3 27B · Gemma 3n E4B · Gemma 3 12B · DeepSeek R1
                Nemotron Nano 9B · LLaMA 3.3 70B · Qwen3 4B · Mistral Small 3.1
 Animations   →  Framer Motion 12.34
-Charts       →  Recharts 3.7 (lazy loaded with Suspense)
+Charts       →  Recharts 3.7 (lazy loaded with Suspense + useMemo)
 PDF Export   →  jsPDF 4.1 + jspdf-autotable 5 + html2canvas 1.4
-Confetti     →  canvas-confetti 1.9
+Confetti     →  canvas-confetti 1.9 (dynamic import)
 Notifications→  react-hot-toast 2.6
-Icons        →  react-icons 5.5 (hi, hi2)
+Icons        →  react-icons 5.5 (hi, hi2) — tree-shaken via optimizePackageImports
 Counters     →  react-countup 6.5 (with scroll-spy)
 HTTP         →  Axios 1.13
-Fonts        →  Geist Sans + Geist Mono (local)
+Fonts        →  Geist Sans + Geist Mono (local, display: swap)
 Dev Server   →  Turbopack (instant HMR)
+Compression  →  Built-in gzip/Brotli via Next.js compress: true
 ```
 
 ---
@@ -169,7 +172,7 @@ energy-calculator/
 │       ├── pdf.ts                         # PDF report generation
 │       └── types.ts                       # TypeScript interfaces & types (12 types)
 ├── .env.local                             # API keys (not committed)
-├── next.config.mjs                        # Next.js config with optimizePackageImports
+├── next.config.mjs                        # Next.js config — compression, cache headers, image formats
 ├── tailwind.config.ts                     # Custom color palette & animations
 ├── package.json
 └── README.md
@@ -404,6 +407,30 @@ The chatbot also auto-detects questions starting with: who, what, why, how, when
 
 ---
 
+## 🚀 Performance
+
+The following optimizations are baked in to keep every page fast:
+
+| Area | Optimization | Benefit |
+|------|--------------|---------|
+| **Network** | Gzip/Brotli compression (`compress: true`) | Smaller response payloads |
+| **Network** | `Cache-Control: immutable` on `/_next/static/*` | Browser caches assets permanently (content-hashed) |
+| **Network** | `s-maxage=86400, stale-while-revalidate` on `/api/electricity-rate` | CDN caches rate data for 24 h |
+| **Network** | `no-store` on all AI endpoints | Prevents stale AI responses |
+| **Bundle** | `ChatBot` (41 KB) + `TipsModal` (25 KB) lazy-loaded via `next/dynamic` | ~66 KB removed from every non-calculator page |
+| **Bundle** | All chart components lazy-loaded with `<Suspense>` | Charts never block the initial render |
+| **Bundle** | `optimizePackageImports` for react-icons, framer-motion, recharts | Tree-shakes icon & animation bundles |
+| **Runtime** | Custom cursor rAF loop skips `setState` when position unchanged | Eliminates ~60 React re-renders/sec at idle |
+| **Runtime** | `ChatBubble` wrapped in `React.memo` | Prevents sibling-message cascade re-renders |
+| **Runtime** | `timeStr` in `useMemo`, chart data in `useMemo` | Avoids redundant string formatting & array mapping |
+| **Runtime** | `CustomTooltip` defined outside `EnergyPieChart` | Recharts never remounts the tooltip component |
+| **CSS** | `will-change: opacity` on typing dots | Browser composites animation on GPU |
+| **CSS** | `contain: layout style` + `will-change: transform` on cursor elements | Cursor movement never triggers full-page reflow |
+| **Fonts** | `display: swap` on local Geist fonts | Text visible immediately, no invisible-text flash (FOIT) |
+| **Images** | `formats: ['image/avif', 'image/webp']` | Next.js `<Image>` auto-serves modern formats |
+
+---
+
 ## 🖱️ Custom Animated Cursor
 
 | Feature               | Description                                                                          |
@@ -417,6 +444,7 @@ The chatbot also auto-detects questions starting with: who, what, why, how, when
 | **Click ripple**      | Expanding circle animation on mouse click                                            |
 | **Toggle button**     | Enable/disable with localStorage persistence (fixed bottom-right)                    |
 | **Accessibility**     | Respects `prefers-reduced-motion` · Auto-hides on mobile/touch devices               |
+| **Perf-optimized**    | rAF loop skips `setState` when cursor hasn't moved — zero idle CPU cost              |
 
 ---
 
