@@ -73,6 +73,9 @@ export interface ChatMessage {
 export type ChatStep =
   | "greeting"
   | "ask_country"
+  | "ask_rate_source"
+  | "ask_custom_rate"
+  | "ask_currency"
   | "ask_device_count"
   | "ask_device_type"
   | "ask_quantity"
