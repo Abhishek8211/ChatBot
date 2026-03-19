@@ -27,6 +27,12 @@ aside {
 .custom-cursor-active * {
   cursor: none !important;
 }
+/* Isolate cursor layout so it never triggers whole-page reflow */
+.custom-cursor-ring,
+.custom-cursor-dot {
+  contain: layout style;
+  will-change: transform;
+}
 /* Keep native cursor on the toggle button itself */
 .custom-cursor-active [data-cursor-toggle] {
   cursor: pointer !important;
@@ -124,6 +130,8 @@ body {
 }
 .typing-dot {
   animation: typing 1.4s infinite;
+  /* GPU-accelerate the opacity animation — avoids main-thread layout */
+  will-change: opacity;
 }
 .typing-dot:nth-child(2) {
   animation-delay: 0.2s;
