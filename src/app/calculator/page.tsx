@@ -6,8 +6,7 @@
 
 import { useState, lazy, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import ChatBot from "@/components/ChatBot";
-import TipsModal from "@/components/TipsModal";
+import dynamic from "next/dynamic";
 import { CalculationResult } from "@/utils/types";
 import { downloadReport } from "@/utils/pdf";
 import {
@@ -31,10 +30,25 @@ import {
   HiOutlineLightBulb,
 } from "react-icons/hi";
 
+// Lazy-load heavy components — excluded from initial bundle
+const ChatBot = dynamic(() => import("@/components/ChatBot"), {
+  ssr: false,
+  loading: () => (
+    <div className="glass rounded-2xl p-6 animate-pulse h-[480px] flex items-center justify-center">
+      <div className="text-dark-300 text-sm">Loading chat...</div>
+    </div>
+  ),
+});
+
+const TipsModal = dynamic(() => import("@/components/TipsModal"), {
+  ssr: false,
+});
+
 // Lazy load charts for code splitting
 const EnergyPieChart = lazy(() => import("@/components/charts/EnergyPieChart"));
 const EnergyBarChart = lazy(() => import("@/components/charts/EnergyBarChart"));
 const CostBreakdownChart = lazy(
+
   () => import("@/components/charts/CostBreakdownChart"),
 );
 
