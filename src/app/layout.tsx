@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import AppShell from "@/components/layout/AppShell";
 import { Toaster } from "react-hot-toast";
 import dynamic from "next/dynamic";
 
+// Dynamically import cursor — browser-only, not needed for SSR
 const CustomCursor = dynamic(() => import("@/components/CustomCursor"), {
   ssr: false,
 });
@@ -13,12 +14,20 @@ const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
   weight: "100 900",
+  display: "swap", // prevent FOIT
 });
 const geistMono = localFont({
   src: "./fonts/GeistMonoVF.woff",
   variable: "--font-geist-mono",
   weight: "100 900",
+  display: "swap",
 });
+
+export const viewport: Viewport = {
+  themeColor: "#20c997",
+  width: "device-width",
+  initialScale: 1,
+};
 
 export const metadata: Metadata = {
   title: "EnergyIQ — Smart Energy Consumption Calculator",
@@ -26,6 +35,12 @@ export const metadata: Metadata = {
     "AI-powered chatbot that calculates your home energy consumption, estimates monthly costs, and provides energy-saving tips.",
   keywords:
     "energy calculator, electricity cost, kWh, smart home, energy saving",
+  openGraph: {
+    title: "EnergyIQ — Smart Energy Consumption Calculator",
+    description:
+      "Calculate your home energy consumption with AI and discover smart ways to save.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
@@ -57,3 +72,4 @@ export default function RootLayout({
     </html>
   );
 }
+
