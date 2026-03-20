@@ -4,6 +4,7 @@
 // EnergyPieChart — device-wise distribution
 // ============================================
 
+import { useMemo } from "react";
 import { motion } from "framer-motion";
 import {
   PieChart,
@@ -20,34 +21,41 @@ interface Props {
   result: CalculationResult;
 }
 
-export default function EnergyPieChart({ result }: Props) {
-  const data = result.devices.map((d, idx) => ({
-    name: `${DEVICE_ICONS[d.device.type]} ${d.device.type}`,
-    value: d.monthlyKwh,
-    cost: d.monthlyCost,
-    percentage: d.percentage,
-    fill: CHART_COLORS[idx % CHART_COLORS.length],
-  }));
+// Defined outside the component so Recharts gets a stable reference
+// and never unnecessarily remounts the tooltip
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function CustomTooltip({ active, payload, currency }: any) {
+  if (active && payload && payload.length) {
+    const item = payload[0].payload;
+    return (
+      <div className="glass rounded-xl px-4 py-3 text-sm border border-white/10">
+        <p className="font-semibold text-dark-50">{item.name}</p>
+        <p className="text-primary-400">
+          {item.value} kWh ({item.percentage}%)
+        </p>
+        <p className="text-accent-400">
+          Cost: {currency}
+          {item.cost}
+        </p>
+      </div>
+    );
+  }
+  return null;
+}
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      const item = payload[0].payload;
-      return (
-        <div className="glass rounded-xl px-4 py-3 text-sm border border-white/10">
-          <p className="font-semibold text-dark-50">{item.name}</p>
-          <p className="text-primary-400">
-            {item.value} kWh ({item.percentage}%)
-          </p>
-          <p className="text-accent-400">
-            Cost: {result.currency}
-            {item.cost}
-          </p>
-        </div>
-      );
-    }
-    return null;
-  };
+export default function EnergyPieChart({ result }: Props) {
+  // Only recompute chart data when result changes
+  const data = useMemo(
+    () =>
+      result.devices.map((d, idx) => ({
+        name: `${DEVICE_ICONS[d.device.type]} ${d.device.type}`,
+        value: d.monthlyKwh,
+        cost: d.monthlyCost,
+        percentage: d.percentage,
+        fill: CHART_COLORS[idx % CHART_COLORS.length],
+      })),
+    [result.devices],
+  );
 
   return (
     <motion.div
@@ -81,7 +89,9 @@ export default function EnergyPieChart({ result }: Props) {
               />
             ))}
           </Pie>
-          <Tooltip content={<CustomTooltip />} />
+          <Tooltip
+            content={<CustomTooltip currency={result.currency} />}
+          />
           <Legend
             verticalAlign="bottom"
             height={36}
