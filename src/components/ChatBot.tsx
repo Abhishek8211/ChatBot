@@ -4,7 +4,7 @@
 // ChatBot Component — Conversational energy calculator
 // ============================================
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { HiOutlinePaperAirplane } from "react-icons/hi2";
 import {
@@ -102,13 +102,17 @@ function TypingIndicator() {
 }
 
 /** Single chat message bubble with hover timestamp */
-function ChatBubble({ message }: { message: ChatMessage }) {
+const ChatBubble = memo(function ChatBubble({ message }: { message: ChatMessage }) {
   const [showTime, setShowTime] = useState(false);
   const isBot = message.role === "bot";
-  const timeStr = message.timestamp.toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  // Memoize the formatted time string — only recomputes when timestamp changes
+  const timeStr = useMemo(() =>
+    message.timestamp.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+    [message.timestamp]
+  );
 
   return (
     <motion.div
@@ -150,7 +154,7 @@ function ChatBubble({ message }: { message: ChatMessage }) {
       </div>
     </motion.div>
   );
-}
+})
 
 /** Floating running cost total */
 function RunningTotal({
@@ -527,20 +531,104 @@ export default function ChatBot({ onCalculationComplete }: ChatBotProps) {
             addBotMessage(
               `✅ Got it! Electricity rate for <strong>${data.country}</strong>:<br/>` +
                 `⚡ <strong>${data.currency}${data.rate_per_kwh}/kWh</strong> (${data.source === "api-ninjas" ? "live rate" : "estimated rate"})<br/><br/>` +
-                `Now, <strong>how many electrical devices</strong> do you use at home?`,
+                `Does this match your electricity bill, or would you like to <strong>enter your own rate</strong>? 🧾<br/><br/>` +
+                `<em>Tip: Check your electricity bill for the "rate per unit" or "cost per kWh" value.</em>`,
               undefined,
               true,
             );
           } else {
             addBotMessage(
-              `⚠️ Couldn't fetch rates for that country. Using default rate: <strong>${rateData.currency}${rateData.rate}/kWh</strong> (${rateData.country}).<br/><br/>` +
-                `<strong>How many electrical devices</strong> do you use at home?`,
+              `⚠️ Couldn't fetch rates for that country. Using default rate: <strong>${rateData.currency}${rateData.rate}/kWh</strong>.<br/><br/>` +
+                `Would you like to <strong>use this default rate</strong> or <strong>enter your actual rate</strong> from your electricity bill? 🧾`,
               undefined,
               true,
             );
           }
-          setStep("ask_device_count");
+          setStep("ask_rate_source");
         });
+        break;
+      }
+
+      case "ask_rate_source": {
+        const useAuto =
+          lower === "use auto rate" ||
+          lower === "yes" ||
+          lower === "auto" ||
+          lower === "ok" ||
+          lower === "yes, use this" ||
+          lower === "confirm";
+        const useCustom =
+          lower === "enter my rate" ||
+          lower === "custom" ||
+          lower === "no" ||
+          lower === "my rate" ||
+          lower === "manual" ||
+          lower === "enter my own rate";
+
+        if (useAuto) {
+          addBotMessage(
+            `✅ Great! Using <strong>${rateData.currency}${rateData.rate}/kWh</strong> for calculations.<br/><br/>` +
+              `Now, <strong>how many electrical devices</strong> do you want to include?`,
+            undefined,
+            true,
+          );
+          setStep("ask_device_count");
+        } else if (useCustom) {
+          addBotMessage(
+            `📝 Sure! Please enter your <strong>electricity rate per kWh</strong> from your bill.<br/><br/>` +
+              `For example, if your bill says <em>"₹6.50 per unit"</em>, just type <code>6.5</code><br/>` +
+              `(1 unit = 1 kWh)<br/><br/>` +
+              `💡 Where to find it: Look for <em>"rate per unit"</em>, <em>"energy charge"</em>, or <em>"cost per kWh"</em> on your bill.`,
+            undefined,
+            true,
+          );
+          setStep("ask_custom_rate");
+        } else {
+          addBotMessage(
+            `Please choose one of the options below, or type <code>yes</code> to use the auto rate or <code>no</code> to enter your own.`,
+          );
+        }
+        break;
+      }
+
+      case "ask_custom_rate": {
+        const customRate = parseFloat(userInput.replace(/[^0-9.]/g, ""));
+        if (isNaN(customRate) || customRate < 0.01 || customRate > 999) {
+          addBotMessage(
+            `⚠️ Please enter a valid rate (e.g. <code>6.5</code> or <code>8</code>).<br/>` +
+              `The rate should be between 0.01 and 999 per kWh.`,
+          );
+          return;
+        }
+        setRateData((prev) => ({ ...prev, rate: customRate }));
+        addBotMessage(
+          `✅ Rate set to <strong>${rateData.currency}${customRate}/kWh</strong>.<br/><br/>` +
+            `Now, what <strong>currency symbol</strong> should I use for your costs?<br/>` +
+            `Pick one below or type your own (e.g. <code>₹</code>, <code>$</code>, <code>€</code>):`,
+          undefined,
+          true,
+        );
+        setStep("ask_currency");
+        break;
+      }
+
+      case "ask_currency": {
+        const currencyInput = userInput.trim();
+        if (!currencyInput || currencyInput.length > 5) {
+          addBotMessage(
+            `Please enter a valid currency symbol (e.g. <code>₹</code>, <code>$</code>, <code>€</code>, <code>£</code>).`,
+          );
+          return;
+        }
+        setRateData((prev) => ({ ...prev, currency: currencyInput }));
+        addBotMessage(
+          `✅ Currency set to <strong>${currencyInput}</strong>.<br/><br/>` +
+            `Perfect! Now let's add your devices.<br/>` +
+            `<strong>How many electrical devices</strong> do you want to include?`,
+          undefined,
+          true,
+        );
+        setStep("ask_device_count");
         break;
       }
 
@@ -751,6 +839,20 @@ export default function ChatBot({ onCalculationComplete }: ChatBotProps) {
           { label: "🇨🇦 Canada", value: "Canada" },
           { label: "🇯🇵 Japan", value: "Japan" },
           { label: "🇧🇷 Brazil", value: "Brazil" },
+        ];
+      case "ask_rate_source":
+        return [
+          { label: "✅ Use auto rate", value: "use auto rate" },
+          { label: "✍️ Enter my rate", value: "enter my rate" },
+        ];
+      case "ask_currency":
+        return [
+          { label: "₹ Rupee", value: "₹" },
+          { label: "$ Dollar", value: "$" },
+          { label: "€ Euro", value: "€" },
+          { label: "£ Pound", value: "£" },
+          { label: "¥ Yen", value: "¥" },
+          { label: "AED Dirham", value: "AED " },
         ];
       case "ask_device_count":
         return [
@@ -983,19 +1085,27 @@ export default function ChatBot({ onCalculationComplete }: ChatBotProps) {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSend()}
             placeholder={
-              step === "ask_device_count"
-                ? "Enter number of devices..."
-                : step === "ask_device_type"
-                  ? "Type device name or click above..."
-                  : step === "ask_quantity"
-                    ? "Enter quantity..."
-                    : step === "ask_wattage"
-                      ? "Enter wattage or type 'auto'..."
-                      : step === "ask_hours"
-                        ? "e.g. 2, 30m, 1h30m..."
-                        : step === "free_ask"
-                          ? "Ask any electricity question..."
-                          : "Type a message..."
+              step === "ask_country"
+                ? "Type your country name..."
+                : step === "ask_rate_source"
+                  ? "Type 'yes' to confirm or 'no' to enter your own rate..."
+                  : step === "ask_custom_rate"
+                    ? "e.g. 6.5 (your rate per kWh from your bill)..."
+                    : step === "ask_currency"
+                      ? "e.g. ₹, $, €, £..."
+                      : step === "ask_device_count"
+                        ? "Enter number of devices..."
+                        : step === "ask_device_type"
+                          ? "Type device name or click above..."
+                          : step === "ask_quantity"
+                            ? "Enter quantity..."
+                            : step === "ask_wattage"
+                              ? "Enter wattage or type 'auto'..."
+                              : step === "ask_hours"
+                                ? "e.g. 2, 30m, 1h30m..."
+                                : step === "free_ask"
+                                  ? "Ask any electricity question..."
+                                  : "Type a message..."
             }
             className="flex-1 px-4 py-2.5 rounded-xl glass text-sm text-dark-50 placeholder-dark-300 focus:outline-none focus:ring-1 focus:ring-primary-500/50 transition-all"
           />
