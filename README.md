@@ -10,7 +10,6 @@
 [![OpenRouter AI](https://img.shields.io/badge/OpenRouter-AI-8E75B2?style=for-the-badge&logo=openai&logoColor=white)](https://openrouter.ai/)
 [![Framer Motion](https://img.shields.io/badge/Framer_Motion-12.34-FF0055?style=for-the-badge&logo=framer&logoColor=white)](https://www.framer.com/motion/)
 [![Performance](https://img.shields.io/badge/Optimized-Performance-20c997?style=for-the-badge&logo=lighthouse&logoColor=white)](#-performance)
-[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
 **Chat with our AI to calculate your home electricity consumption, explore live rates across 60+ countries, get AI-powered saving tips via OpenRouter (8-model fallback chain), and download detailed PDF reports — all through a stunning conversational interface.**
 
